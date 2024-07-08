@@ -1,0 +1,6 @@
+- se clickiamo su una zona vuota non dovrebbe mostrare statistiche
+- arco selezionato dopo edit (?)
+- visualizzazione diversa statistiche archi e nodi
+- se non posso editare non mostrare editor
+- messaggi di errore (id già presente)
+- i nodi che vengono toccati si bloccano
