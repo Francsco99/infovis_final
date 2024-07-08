@@ -1,31 +1,31 @@
-body {
-    font-family: Arial, sans-serif;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
+* {
     margin: 0;
     padding: 0;
-}
-
-#button-container {
-    width: 90%;
-    margin-top: 20px;
-    display: flex;
-    justify-content: flex-start;
-    gap: 10px;
-}
-
-#svg-container {
-    width: 90%;
-    height: auto;
-    border: 1px solid #ccc;
-    margin-top: 20px;
-}
-
-#svg-tools {
-    width: 90%;
-    margin-top: 20px;
-    border: 1px solid #ccc;
-    padding: 10px;
     box-sizing: border-box;
+}
+
+html, body {
+    height: 100%;
+    width: 100%;
+    font-family: Arial, sans-serif;
+}
+
+.button-container {
+    display: flex;
+    justify-content: center;
+    padding: 20px;
+    background-color: #f0f0f0;
+    border-bottom: 1px solid #ccc;
+}
+
+.svg-container {
+    display: flex;
+    flex-grow: 1;
+    height: calc(100% - 50px); /* Adjust this if you change the button container height */
+    border: 2px solid #000; /* Border around the canvas container */
+}
+
+#svgCanvas {
+    width: 100%;
+    height: 100%;
 }
