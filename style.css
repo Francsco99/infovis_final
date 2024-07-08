@@ -1,0 +1,31 @@
+body {
+    font-family: Arial, sans-serif;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    margin: 0;
+    padding: 0;
+}
+
+#button-container {
+    width: 90%;
+    margin-top: 20px;
+    display: flex;
+    justify-content: flex-start;
+    gap: 10px;
+}
+
+#svg-container {
+    width: 90%;
+    height: auto;
+    border: 1px solid #ccc;
+    margin-top: 20px;
+}
+
+#svg-tools {
+    width: 90%;
+    margin-top: 20px;
+    border: 1px solid #ccc;
+    padding: 10px;
+    box-sizing: border-box;
+}
