@@ -1,0 +1,20 @@
+rimosso artificial_index
+rimossa funzione split
+rimossa funzione glue
+modificata funzione isEditable
+modificata d3.select(window).on('click', function ()
+modificata funzione on-click di toolbar scissor e glue
+rimosso buttonFilteredGraph
+modificato buttonArtificialGraph in buttonSaveDrawing
+rimossa funzione findNextNotArtificialId
+rimossa funzione orderWithoutArtificial
+rimossa funzione createFilteredResult
+rimosso button.addEventListener
+modificato button2.addEventListener in button.addEventListener
+modificata handleFileSelect
+modificata createResult
+modificata new_nodes.append('circle')
+modificata new_nodes.append('text')
+modificata .on('mouseup.add_link', (function(d)
+
+sistemato bug in submit_changes
