@@ -5,7 +5,9 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Spring Embedder Graph Drawing Tool</title>
     <link rel="stylesheet" href="style.css">
+    <!--Icons-->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css" integrity="sha512-SnH5WK+bZxgPHs44uWIX+LLJAJ9/2PkPKZ5QiAj6Ta86w+fsb2TkcmfRyVX3pBnMFcV7oQPJkl9QevSCWr3W6A==" crossorigin="anonymous" referrerpolicy="no-referrer" />
+    <!--Font-->
     <link href='https://fonts.googleapis.com/css?family=Open Sans' rel='stylesheet'>
 </head>
 <body>
@@ -14,26 +16,30 @@
     </header>
     <div class="toolbar">
         <div class="toolbar-left">
-            <span>ID</span>
-            <span>LABEL</span>
-            <span>COLOR</span>
+            <span>ID: </span>
+            <span>LABEL: </span>
+            <span>COLOR: </span>
         </div>
         <div class="toolbar-center">
-            <i class="icon fa-solid fa-arrow-pointer fa-2xl"></i>
-            <i class="icon fa-solid fa-circle-plus fa-2xl"></i>
-            <i class="icon fa-solid fa-link fa-2xl"></i>
-            <i class="icon fa-solid fa-pen-to-square fa-2xl"></i>
-            <i class="icon fa-solid fa-eraser fa-2xl"></i>
+            <i id="select" class="icon toolbar-icon fa-solid fa-arrow-pointer fa-2xl"></i>
+            <i id="add-node" class="icon toolbar-icon fa-solid fa-circle-plus fa-2xl"></i>
+            <i id="add-link" class="icon toolbar-icon fa-solid fa-link fa-2xl"></i>
+            <i id="edit" class="icon toolbar-icon fa-solid fa-pen-to-square fa-2xl"></i>
+            <i id="delete" class="icon toolbar-icon fa-solid fa-eraser fa-2xl"></i>
             <i id="help-icon" class="icon fa-solid fa-circle-question fa-2xl"></i>
         </div>
         <div class="toolbar-right">
-            <button class="icon png-download"><i class="fa-solid fa-camera fa-2xl"></i></button>
-            <button class="icon json-download"><i class="fa-solid fa-floppy-disk fa-2xl"></i></button>
-            <button class="icon json-upload"><i class="fa-solid fa-file-arrow-up fa-2xl"></i></button>
+            <button id="svg-download" class="icon"><i class="fa-solid fa-camera fa-2xl"></i></button>
+            <button id="json-download" class="icon"><i class="fa-solid fa-floppy-disk fa-2xl"></i></button>
+            <button id="json-upload" class="icon"><i class="fa-solid fa-file-arrow-up fa-2xl"></i></button>
         </div>
     </div>
     <div class="canvas-container">
-        <svg id="graph-canvas"></svg>
+        <svg id="graph-canvas">
+            <!-- Elementi SVG di esempio -->
+            <circle cx="50" cy="50" r="30" stroke="black" stroke-width="3" fill="red" />
+            <line x1="10" y1="10" x2="100" y2="100" stroke="black" stroke-width="2" />
+        </svg>
         <div class="zoom-controls">
             <button id="zoom-in"><i class="icon fa-solid fa-magnifying-glass-plus fa-2xl"></i></button>
             <button id="zoom-out"><i class="icon fa-solid fa-magnifying-glass-minus fa-2xl"></i></button>
@@ -41,7 +47,7 @@
     </div>
     <div id="popup" class="popup">
         <div class="popup-content">
-            <span class="close">&times;</span>
+            <i id="close-popup" class="icon fa-solid fa-xmark fa-2xl"></i>
             <h2>Istruzioni</h2>
             <ul>
                 <li><i class="fa-solid fa-arrow-pointer"></i> Seleziona</li>
@@ -50,7 +56,7 @@
                 <li><i class="fa-solid fa-pen-to-square"></i> Modifica</li>
                 <li><i class="fa-solid fa-eraser"></i> Cancella</li>
                 <li><i class="fa-solid fa-circle-question"></i> Mostra questo popup</li>
-                <li><i class="fa-solid fa-camera"></i> Download PNG</li>
+                <li><i class="fa-solid fa-camera"></i> Download SVG</li>
                 <li><i class="fa-solid fa-floppy-disk"></i> Download JSON</li>
                 <li><i class="fa-solid fa-file-arrow-up"></i> Upload JSON</li>
                 <li><i class="fa-solid fa-magnifying-glass-plus"></i> Zoom In</li>
@@ -58,6 +64,8 @@
             </ul>
         </div>
     </div>
-    <script src="info_popup.js"></script>
+    <script src="js/info_popup.js"></script>
+    <script src="js/icon_click.js"></script>
+    <script src="js/download.js"></script>
 </body>
 </html>

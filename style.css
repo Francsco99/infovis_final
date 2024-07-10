@@ -30,6 +30,7 @@ header h1{
 
 .toolbar-left span {
     margin-right: 15px;
+    font-weight: bold;
 }
 
 .toolbar-right{
@@ -55,6 +56,10 @@ header h1{
     background: none;
     border: none;
     cursor: pointer;
+}
+
+.toolbar-icon.active {
+    color: red;
 }
 
 .canvas-container {
@@ -141,10 +146,9 @@ header h1{
     margin-right: 10px;
 }
 
-.close {
+#close-popup {
     position: absolute;
-    top: 10px;
+    top: 20px;
     right: 10px;
-    font-size: 20px;
     cursor: pointer;
 }
