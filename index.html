@@ -9,6 +9,9 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css" integrity="sha512-SnH5WK+bZxgPHs44uWIX+LLJAJ9/2PkPKZ5QiAj6Ta86w+fsb2TkcmfRyVX3pBnMFcV7oQPJkl9QevSCWr3W6A==" crossorigin="anonymous" referrerpolicy="no-referrer" />
     <!--Font-->
     <link href='https://fonts.googleapis.com/css?family=Open Sans' rel='stylesheet'>
+
+    <!--d3 library-->
+    <script src="https://d3js.org/d3.v7.min.js"></script>
 </head>
 <body>
     <header>
@@ -36,36 +39,40 @@
     </div>
     <div class="canvas-container">
         <svg id="graph-canvas">
-            <!-- Elementi SVG di esempio -->
-            <circle cx="50" cy="50" r="30" stroke="black" stroke-width="3" fill="red" />
-            <line x1="10" y1="10" x2="100" y2="100" stroke="black" stroke-width="2" />
+            <g id="canvas-group">
+                <!-- Elementi SVG di esempio -->
+                <circle cx="50" cy="50" r="30" stroke="black" stroke-width="3" fill="red" />
+                <line x1="10" y1="10" x2="100" y2="100" stroke="black" stroke-width="2" />
+            </g>
         </svg>
+        
         <div class="zoom-controls">
-            <button id="zoom-in"><i class="icon fa-solid fa-magnifying-glass-plus fa-2xl"></i></button>
-            <button id="zoom-out"><i class="icon fa-solid fa-magnifying-glass-minus fa-2xl"></i></button>
+            <i id="zoom-in" class="icon fa-solid fa-magnifying-glass-plus fa-xl"></i>
+            <i id="zoom-out" class="icon fa-solid fa-magnifying-glass-minus fa-xl"></i>
         </div>
     </div>
     <div id="popup" class="popup">
         <div class="popup-content">
             <i id="close-popup" class="icon fa-solid fa-xmark fa-2xl"></i>
-            <h2>Istruzioni</h2>
+            <h2>Instructions</h2>
             <ul>
-                <li><i class="fa-solid fa-arrow-pointer"></i> Seleziona</li>
-                <li><i class="fa-solid fa-circle-plus"></i> Aggiungi nodo</li>
-                <li><i class="fa-solid fa-link"></i> Aggiungi arco</li>
-                <li><i class="fa-solid fa-pen-to-square"></i> Modifica</li>
-                <li><i class="fa-solid fa-eraser"></i> Cancella</li>
-                <li><i class="fa-solid fa-circle-question"></i> Mostra questo popup</li>
-                <li><i class="fa-solid fa-camera"></i> Download SVG</li>
-                <li><i class="fa-solid fa-floppy-disk"></i> Download JSON</li>
-                <li><i class="fa-solid fa-file-arrow-up"></i> Upload JSON</li>
-                <li><i class="fa-solid fa-magnifying-glass-plus"></i> Zoom In</li>
-                <li><i class="fa-solid fa-magnifying-glass-minus"></i> Zoom Out</li>
+                <li><i class="fa-solid fa-arrow-pointer fa-xl"></i> Select an element</li>
+                <li><i class="fa-solid fa-circle-plus fa-xl"></i> Add a new node</li>
+                <li><i class="fa-solid fa-link fa-xl"></i> Add a new link</li>
+                <li><i class="fa-solid fa-pen-to-square fa-xl"></i> Edit node or link</li>
+                <li><i class="fa-solid fa-eraser fa-xl"></i> Delete node or link</li>
+                <li><i class="fa-solid fa-circle-question fa-xl"></i>Show this guide</li>
+                <li><i class="fa-solid fa-camera fa-xl"></i> Download the graph in SVG</li>
+                <li><i class="fa-solid fa-floppy-disk fa-xl"></i> Download the graph in JSON</li>
+                <li><i class="fa-solid fa-file-arrow-up fa-xl"></i> Upload the graph in JSON</li>
+                <li><i class="fa-solid fa-magnifying-glass-plus fa-xl"></i> Zoom In</li>
+                <li><i class="fa-solid fa-magnifying-glass-minus fa-xl"></i> Zoom Out</li>
             </ul>
         </div>
     </div>
     <script src="js/info_popup.js"></script>
     <script src="js/icon_click.js"></script>
     <script src="js/download.js"></script>
+    <script src="js/zoom_control.js"></script>
 </body>
 </html>

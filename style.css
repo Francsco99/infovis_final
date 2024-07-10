@@ -75,6 +75,7 @@ header h1{
 #graph-canvas {
     width: 100%;
     height: 100%;
+    transform-origin: center;
 }
 
 .zoom-controls {
@@ -85,7 +86,7 @@ header h1{
     flex-direction: column;
 }
 
-.zoom-controls button {
+.zoom-controls i {
     margin: 10px;
     padding: 10px; /* Aumenta il padding per più spazio */
     background: none;
@@ -125,6 +126,7 @@ header h1{
     max-width: 600px;
     position: relative;
     text-align: center;
+
 }
 
 .popup-content h2 {
@@ -139,7 +141,7 @@ header h1{
 .popup-content ul li {
     display: flex;
     align-items: center;
-    margin: 10px 0;
+    margin: 15px 0;
 }
 
 .popup-content ul li i {
