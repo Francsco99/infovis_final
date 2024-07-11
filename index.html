@@ -12,6 +12,8 @@
 
     <!--d3 library-->
     <script src="https://d3js.org/d3.v7.min.js"></script>
+    <!--jquery library-->
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
 </head>
 <body>
     <header>
@@ -31,6 +33,7 @@
             <i id="delete" class="icon toolbar-icon fa-solid fa-eraser fa-2xl"></i>
             <i id="help-icon" class="icon fa-solid fa-circle-question fa-2xl"></i>
         </div>
+
         <div class="toolbar-right">
             <button id="svg-download" class="icon"><i class="fa-solid fa-camera fa-2xl"></i></button>
             <button id="json-download" class="icon"><i class="fa-solid fa-floppy-disk fa-2xl"></i></button>
@@ -39,11 +42,6 @@
     </div>
     <div class="canvas-container">
         <svg id="graph-canvas">
-            <g id="canvas-group">
-                <!-- Elementi SVG di esempio -->
-                <circle cx="50" cy="50" r="30" stroke="black" stroke-width="3" fill="red" />
-                <line x1="10" y1="10" x2="100" y2="100" stroke="black" stroke-width="2" />
-            </g>
         </svg>
         
         <div class="zoom-controls">
@@ -74,5 +72,7 @@
     <script src="js/icon_click.js"></script>
     <script src="js/download.js"></script>
     <script src="js/zoom_control.js"></script>
+    <script src="js/color_picker.js"></script>
+    <script src="main.js"></script>
 </body>
 </html>
