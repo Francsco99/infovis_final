@@ -150,7 +150,10 @@
         // avoid link duplicates
         for (i = 0; i < edges.length; i++) {
           edge = edges[i];
-          if (edge.source === source && edge.target === target) return null;
+          if (edge.source === source && edge.target === target) {
+            alert("errore: arco duplicato");
+            return null;
+          }
         }
   
         newEdge = {
@@ -194,7 +197,12 @@
       var container, library, svg, toolbar;
   
       svg = d3.select('.mainArea');
-  
+
+      // Initialize editor at first open
+      document.getElementById("node_id").value = "";
+      document.getElementById("node_label").value = "";
+      document.getElementById("node_type").value = "";
+
       // ZOOM and PAN
       // create container elements
       container = svg.append('g');
@@ -222,7 +230,7 @@
       global.colorify = d3.scale.category10();
   
       // initialize the force layout
-      global.force = d3.layout.force().size([width, height]).charge(-400).linkDistance(60).on('tick', (function () {
+      global.force = d3.layout.force().size([width, height]).charge(-2000).linkDistance(100).on('tick', (function () {
         // update nodes and edges
         global.vis.selectAll('.node').attr('transform', function (d) {
           return "translate(" + d.x + "," + d.y + ")";
@@ -239,37 +247,35 @@
       }));
   
       // DRAG
-      global.drag = global.force.drag().on('dragstart', function (d) {
-        return d.fixed = true;
-      });
+      global.drag = global.force.drag().on('dragstart');
   
       function isEditable(selection){
         if (selection !== null) {
           if (__indexOf.call(graph.nodes, selection) >= 0) {
-            return 1;
+            return "node";
           } else {
-            return 2;
+            return "link";
           }
          }
-        return 0;
+        return null;
       }
   
-      function isAvailableId(selection, new_id, switch_id){  
+      function isAvailableId(selection, new_id, mode) {
         // se la selezione è un nodo
-        if (switch_id === 1) {
-          if (selection.id === new_id)
-            return true;
-          else {
-            for (let i = 0; i < graph.nodes.length; i++) {
-              if (graph.nodes[i].id === new_id)
-                return false;
+        if (mode === "node") {
+            if (selection.id === new_id)
+                return true;
+            else {
+                for (let i = 0; i < graph.nodes.length; i++) {
+                    if (graph.nodes[i].id === new_id)
+                        return false;
+                }
+                return true;
             }
-            return true;
-          }
         }
   
         // se la selezione è un arco
-        if (switch_id === 2) {
+        if (mode === "link") {
           if (selection.id === new_id)
             return true;
           else {
@@ -284,10 +290,10 @@
   
       function submit_changes(selection) {
   
-        const switch_id = isEditable(selection);
+        const mode = isEditable(selection);
   
-        if (switch_id === 1) {
-          if (isAvailableId(selection, document.getElementById("node_id").value , 1)) {
+        if (mode === "node") {
+          if (isAvailableId(selection, document.getElementById("node_id").value, "node")) {
             let modified_node = {
               id: document.getElementById("node_id").value,
               label: document.getElementById("node_label").value,
@@ -303,8 +309,8 @@
             }
           }
         }
-        else if (switch_id === 2) {
-          if (isAvailableId(selection, document.getElementById("node_id").value, 2)) {
+        else if (mode === "link") {
+          if (isAvailableId(selection, document.getElementById("node_id").value, "link")) {
             graph.remove(selection);
             graph.add_modified_link(selection.source, selection.target, document.getElementById("node_id").value, document.getElementById("node_label").value);
           }
@@ -314,12 +320,12 @@
       }
   
       function showEdit(selection_to_show) {
-        if (isEditable(selection_to_show) === 1) {
+        if (isEditable(selection_to_show) === "node") {
           document.getElementById("node_id").value = selection_to_show.id;
           document.getElementById("node_label").value = selection_to_show.label;
           document.getElementById("node_type").value = selection_to_show.type;
         }
-        else if (isEditable(selection_to_show) === 2) {
+        else if (isEditable(selection_to_show) === "link") {
           document.getElementById("node_id").value = selection_to_show.id;
           document.getElementById("node_label").value = selection_to_show.label;
           document.getElementById("node_type").value = "";
@@ -337,8 +343,13 @@
       });
   
       d3.select(".mainArea").on('click', function () {
-              if (global.selection !== null)
-                showEdit(global.selection);
+        if (global.selection !== null)
+            showEdit(global.selection);
+        else {
+            document.getElementById("node_id").value = "";
+            document.getElementById("node_label").value = "";
+            document.getElementById("node_type").value = "";
+        }
       });
   
       update();

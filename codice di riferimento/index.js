@@ -78,7 +78,6 @@
     ],
 
     last_index: 5,
-    artificial_index: 0,
     links_index:6,
 
     objectify: (function() {
@@ -245,17 +244,14 @@
     });
 
     function isEditable(selection){
-      let bool = 0;
-      if (selection !== null){
+      if (selection !== null) {
         if (__indexOf.call(graph.nodes, selection) >= 0) {
-          if (selection.type !== "artificial")
-            bool = 1;
-        }else {
-          if (selection.source.type !== "artificial" && selection.target.type !== "artificial")
-            bool = 2;
+          return 1;
+        } else {
+          return 2;
         }
        }
-      return bool;
+      return 0;
     }
 
     function isAvailableId(selection, new_id, switch_id){  
@@ -290,43 +286,31 @@
 
       const switch_id = isEditable(selection);
 
-      if (switch_id === 1)
-       if (isAvailableId(selection, document.getElementById("node_id").value , 1)){
-
-        let modified_node = {
-          id: document.getElementById("node_id").value,
-          label: document.getElementById("node_label").value,
-          x: selection.x,
-          y: selection.y,
-          type: document.getElementById("node_type").value
-        };
-
-        let connectedNodes = neighborsOfNode(selection);
-
-        graph.remove(selection);
-        //update();
-
-        graph.nodes.push(modified_node);
-
-        for (let i = 0; i < connectedNodes.length; i++)
-          graph.add_link(modified_node, listLink[i]);
-
-        //global.selection = modified_node;
-        global.selection = null;
-
-      }
-      if (switch_id === 2)
-        if (isAvailableId(selection, document.getElementById("node_id").value, 2)) {
-
+      if (switch_id === 1) {
+        if (isAvailableId(selection, document.getElementById("node_id").value , 1)) {
+          let modified_node = {
+            id: document.getElementById("node_id").value,
+            label: document.getElementById("node_label").value,
+            x: selection.x,
+            y: selection.y,
+            type: document.getElementById("node_type").value
+          };
+          let connectedNodes = neighborsOfNode(selection);
           graph.remove(selection);
-          //update();
-
-          graph.add_modified_link(selection.source, selection.target, document.getElementById("node_id").value, document.getElementById("node_label").value);
-
-          global.selection = null;
+          graph.nodes.push(modified_node);
+          for (let i = 0; i < connectedNodes.length; i++) {
+            graph.add_link(modified_node, connectedNodes[i]);
+          }
         }
-      
+      }
+      else if (switch_id === 2) {
+        if (isAvailableId(selection, document.getElementById("node_id").value, 2)) {
+          graph.remove(selection);
+          graph.add_modified_link(selection.source, selection.target, document.getElementById("node_id").value, document.getElementById("node_label").value);
+        }
+      global.selection = null;
       update();
+      }
     }
 
     function showEdit(selection_to_show) {
@@ -344,73 +328,18 @@
 
     // funzione per colorare le icone e mostrare l'editor 
     d3.select(window).on('click', function () {
-      {
-            if (global.selection !== null) {
-                d3.selectAll("#trashIcon").attr("href", "img/red_trash.jpg");
-              {
-                if (global.selection.type === "artificial")
-                  d3.selectAll("#glueIcon").attr("href", "img/blue_glue.png");
-                else
-                  d3.selectAll("#glueIcon").attr("href", "img/glue.png");
-              }
-            }
-            else
-                d3.selectAll("#trashIcon").attr("href", "img/trash.jpg");
+        if (global.selection !== null) {
+          d3.selectAll("#trashIcon").attr("href", "img/red_trash.jpg");
         }
-        {
-            if (__indexOf.call(graph.edges, global.selection) >= 0)
-                d3.selectAll("#splitIcon").attr("href", "img/red_scissors.png");
-             else
-                d3.selectAll("#splitIcon").attr("href", "img/scissor.png");
-        }
+        else {
+          d3.selectAll("#trashIcon").attr("href", "img/trash.jpg");
+        }        
     });
 
     d3.select(".mainArea").on('click', function () {
             if (global.selection !== null)
               showEdit(global.selection);
     });
-
-    // funzione di split del link con creazione del nodo artificiale
-    function split(linkToSplit) {
-
-      // rimuovi il link selezionato
-      if (__indexOf.call(graph.edges, linkToSplit) >= 0) {
-        graph.remove(linkToSplit);
-        global.selection = null;
-
-        // aggiungi il nodo artificiale
-        let artificialNode;
-        artificialNode = {
-          id: "a" + graph.artificial_index++,
-          x: (linkToSplit.target.x + linkToSplit.source.x) / 2,    // punto medio x del vettore
-          y: (linkToSplit.target.y + linkToSplit.source.y) / 2,
-          type: "artificial"
-        };
-
-        graph.nodes.push(artificialNode);
-
-        //collega i link al nuovo nodo artificiale
-        graph.add_link(linkToSplit.source, artificialNode);
-        graph.add_link(artificialNode, linkToSplit.target);
-
-        update();
-      }
-    }
-
-    // funzione che rimuove il nodo artificiale
-    function glue(artificialNode) {
-      
-      let connectedNodes = neighborsOfNode(artificialNode); //return a list of the near node
-
-      // remove node and associated link
-      graph.remove(artificialNode);
-      global.selection = null;
-
-      // collega i nodi vicini
-      graph.add_link(connectedNodes[0] , connectedNodes[1]);
-
-      update();
-    }
 
     update();
 
@@ -436,7 +365,7 @@
         .attr("width", "125px")
         .attr("href", "img/scissor.png")
         .on("click", function () {
-          split(global.selection)
+          return null;
         });
 
       d3.select(".toolbar")
@@ -454,8 +383,7 @@
           .attr("width", "125px")
           .attr("href", "img/glue.png")
           .on("click", function () {
-            if(global.selection.type === "artificial")
-              glue(global.selection)
+            return null;
           });
 
       d3.select(".toolbar")
@@ -514,13 +442,11 @@
 
     // BUTTONS
     divButtons = $(" <div\n   class='buttons' id='buttons'  </div>" );
-    buttonFilteredGraph = $("<button class='saveButton' id='originalJson'  style='margin-right: 50px;'>Save Planar Graph</button>" );
-    buttonArtificialGraph = $("<button class='saveButton' id='artificialJson' style='margin-right: 50px;' >Save Drawing</button>" );
+    buttonSaveDrawing = $("<button class='saveButton' id='artificialJson' style='margin-right: 50px;' >Save Drawing</button>" );
     buttonLoadJson = $("<input class='saveButton' type=\"file\" id=\"files\" name=\"files[]\" multiple />\n" );
 
     $('body').append(divButtons);
-    divButtons.append(buttonFilteredGraph);
-    divButtons.append(buttonArtificialGraph);
+    divButtons.append(buttonSaveDrawing);
     divButtons.append(buttonLoadJson);
 
     // la stringa s diventa un array di byte (rappresentati come interi a 8 bit)
@@ -583,21 +509,6 @@
       return result;
     }
 
-    function findNextNotArtificialId(currentNode, nextNode) {
-      if (nextNode.type !== "artificial")
-        return nextNode.id;
-      else {
-        // due vicini di cui uno è current
-        let neighbors = neighborsOfNode(nextNode);
-        // i sono gli indici dell'array (non gli elementi)
-        for (let i in neighbors) {
-          if (neighbors[i].id !== currentNode.id) {
-            return findNextNotArtificialId(nextNode, neighbors[i]);
-          }
-        }
-      }
-    }
-
     function createResult() {
       var listaNodi = [];
       var listaLink = [];
@@ -624,126 +535,13 @@
       }
       return {
         nodes: listaNodi,
-        edges: listaLink,
-        nodes_index: listaNodi.length
+        edges: listaLink
       };
     }
 
-    // listOfLinktoSort è una lista di nodi
-    function orderWithoutArtificial(centerNode, listOfLinktoSort) {
-      const center = {x: centerNode.x, y: centerNode.y};
-
-      var startAng;
-      listOfLinktoSort.forEach(point => {
-        var ang = Math.atan2(point.y - center.y, point.x - center.x);
-        if (!startAng) {
-          startAng = ang
-        } else {
-          if (ang < startAng) {  // ensure that all points are clockwise of the start point
-            ang += Math.PI * 2;
-          }
-        }
-        point.angle = ang; // add the angle to the point
-      });
-      // Sort clockwise;
-      listOfLinktoSort.sort((a, b) => a.angle - b.angle);
-
-      /*
-       for ANTI CLOCKWISE use this sniplet
-      // reverse the order
-      const ccwPoints = listOfLinktoSort.reverse();
-      // move the last point back to the start
-      ccwPoints.unshift(ccwPoints.pop());
-       */
-
-      //print
-      var result = [];
-      for (let i = 0; i < listOfLinktoSort.length; i++) {
-        /* change the artificial node with the real node id*/
-        if (listOfLinktoSort[i].type === "artificial")
-          result.push(findNextNotArtificialId(centerNode, listOfLinktoSort[i]));
-        else
-          result.push(listOfLinktoSort[i].id);
-      }
-        return result;
-    }
-
-    function createFilteredResult() {
-      var listaNodi = [];
-      var listaLink = [];
-
-      for (let i = 0; i < graph.nodes.length ; i++) {
-        if (graph.nodes[i].type !== "artificial") {
-          let node = {
-            id: graph.nodes[i].id,
-            label: graph.nodes[i].label,
-            order: orderWithoutArtificial(graph.nodes[i], neighborsOfNode(graph.nodes[i])),
-            color: graph.nodes[i].type,
-            x: graph.nodes[i].x,
-          	y: graph.nodes[i].y,
-          	fixed: true
-          };
-          listaNodi.push(node);
-        }
-      }
-
-      for (let j = 0; j < graph.edges.length; j++) {
-        if (!(graph.edges[j].source.type == "artificial" && graph.edges[j].target.type == "artificial")) {
-          /*for the edges i need only one control or in the target or in the source or i will get some duplicate */
-          if (graph.edges[j].target.type == "artificial"){
-            let originalID = findNextNotArtificialId(graph.edges[j].source , graph.edges[j].target);
-
-            let link = {
-              id: graph.edges[j].id,
-              label: graph.edges[j].label,
-              source: graph.edges[j].source.id,
-              target: originalID
-            };
-
-            listaLink.push(link);
-          }
-          else if (graph.edges[j].source.type !== "artificial" && graph.edges[j].target.type !== "artificial"){
-            let link = {
-              id: graph.edges[j].id,
-              label: graph.edges[j].label,
-              source: graph.edges[j].source.id,
-              target: graph.edges[j].target.id
-            };
-            listaLink.push(link);
-          }
-        }
-      } //iterazione_for
-      return{
-        nodes: listaNodi,
-        edges: listaLink,
-        nodes_index: graph.artificial_index + listaNodi.length // verificare se corretto
-      };
-    }
-
-    // Json trascription of the graph without artificial node and link
-    var button = document.getElementById(buttonFilteredGraph[0].id);
-
-    button.addEventListener('click', function() {
-        let result = createFilteredResult();
-        let data = encode(JSON.stringify(result, null, "\t"));
-
-        // for browser downloading
-        let blob = new Blob([data], {type: 'application/octet-stream'});
-
-        url = URL.createObjectURL(blob);
-
-        var link = document.createElement('a');
-        link.setAttribute('href', url);
-        link.setAttribute('download', 'graph.json');
-
-        let event = document.createEvent('MouseEvents');
-        event.initMouseEvent('click', true, true, window, 1, 0, 0, 0, 0, false, false, false, false, 0, null);
-        link.dispatchEvent(event);
-      });
-
-    // Json trascription of the graph with artificial node too
-    var button2 = document.getElementById( buttonArtificialGraph[0].id );
-    button2.addEventListener( 'click', function() {
+    // Json trascription of the graph
+    var button = document.getElementById(buttonSaveDrawing[0].id);
+    button.addEventListener( 'click', function() {
       var result = createResult();
       var data = encode(JSON.stringify(result, null, "\t"));
 
@@ -784,7 +582,7 @@
 
               for (let i = 0; i < json.nodes.length ; i++) {
 
-                let obj = {
+                let node = {
                   id: json.nodes[i].id,
                   label: json.nodes[i].label,
                   x: json.nodes[i].x,
@@ -793,10 +591,9 @@
                   fixed: true
                 };
 
-                listaNodi.push(obj);
+                listaNodi.push(node);
               }
-              graph.last_index = json.nodes_index;
-              graph.artificial_index = json.nodes_index;
+              graph.last_index = json.nodes.length;
               graph.links_index = json.edges.length;
               
               graph.nodes = listaNodi;
@@ -887,34 +684,16 @@
       new_nodes.call(global.drag);
     }
     new_nodes.append('circle')
-        .attr('r', function(d){
-          if (d.type === "artificial")
-            return 5;
-          else return 18;
-        })
-        .attr('stroke', function(d) {
-          if (d.type === "artificial")
-            return d3.hcl(null).brighter(1);
-          else
-            return global.colorify(d.type);
-       })
-        .attr('fill', function(d) {
-          if (d.type === "artificial")
-            return d3.hcl(null).brighter(3);
-          else
-            return d3.hcl(global.colorify(d.type)).brighter(3);
-      });
+        .attr('r', function(d) {return 18;})
+        .attr('stroke', function(d) {return global.colorify(d.type);})
+        .attr('fill', function(d) {return d3.hcl(global.colorify(d.type)).brighter(3);});
+    
     // draw the labels
 
     new_nodes.append('text')
-        .text(function(d) {
-          if(d.type === "artificial")
-            return "";
-          else return d.id;})
+        .text(function(d) {return d.id;})
         .attr('dy', '0.35em')
-        .attr('fill', function(d) {
-            return global.colorify(d.type);
-    });
+        .attr('fill', function(d) {return global.colorify(d.type);});
     return nodes.exit().remove();
   };
 
@@ -930,11 +709,8 @@
       // prevent text selection
       return d3.event.preventDefault();
     })).on('mouseup.add_link', (function(d) {
-      // il controllo è per evitare loop di archi artificiali
-      if (global.new_link_source.type !== "artificial" && d.type !== "artificial") {
-        // add link and update, but only if a link is actually added
-        if (graph.add_link(global.new_link_source, d) != null) return update();
-      }
+      // add link and update, but only if a link is actually added
+      if (graph.add_link(global.new_link_source, d) != null) return update();
     }));
   };
 
