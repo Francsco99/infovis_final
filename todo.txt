@@ -1,24 +1,14 @@
-- se clickiamo su una zona vuota non dovrebbe mostrare statistiche
 - arco selezionato dopo edit (?)
-- visualizzazione diversa statistiche archi e nodi
-- se non posso editare non mostrare editor
 - messaggi di errore (id già presente)
-- i nodi che vengono toccati si bloccano
-- aggiungere esportazione in png o svg
 - selezionare più nodi da modificare contemporaneamente
-
-- aggiungere lenti per zoom
 - doppio click per modificare nodo o arco
-- guida per i comandi
 - visualizzazione delle statistiche
 
-- opzionale: aggiungere i nodi artificali
-
 Spezzano:
-- design HTML (canvas, toolbar, editor, statistiche, download e opzioni)
+- design HTML (editor), visualizzazione delle statistiche
 
 Salienti:
-- dragged node non più bloccati, migliorare la distinzione tra nodi e archi nel codice
+- messaggi di errore (es. id già presente) con gli alert, slider per parametri forza
 
 Ivan:
-- ottimizzazione grafo, rimozione nodi artificiali
+- ottimizzazione grafo, collegare tasti toolbar nuova al codice working
