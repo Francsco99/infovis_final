@@ -174,18 +174,126 @@ document.addEventListener('DOMContentLoaded', function(){
     d3.selectAll('.link').classed('selected',d => d===global.selection);
   }
 
+  /*Funzione principale*/
+  window.main = (function(){
+    // Definizioni delle variabili globali
+    var container, library, svg, toolbar;
+
+    // Selezione area di disegno svg
+    svg = d3.getElementById("graph-canvas");
+
+    // Creazione contenitore per il grafo
+    container = svg.append('g');
+
+    // Inizializzazione grafo
+    global.vis = container.append('g');
+
+    // Creazione di onverlay rettangolare per catturare gli eventi
+    global.vis.append('rect')
+      .attr('class','overlay')
+      .attr('x', -500000)
+      .attr('y', -500000)
+      .attr('width', 1000000)
+      .attr('height', 1000000)
+      .on('click', function () {
+          // Pulizia della selezione
+          global.selection = null;
+          d3.selectAll('.node').classed('selected', false);
+          d3.selectAll('.link').classed('selected', false);
+        });
+
+    // Inizializzazione layout force directed
+    global.force = d3.layout.force()
+        .size([width,height])
+        .charge(-400)
+        .linkDistance(60)
+        .on('tick',function(){
+          // Aggiornamento posizione nodi e archi
+          global.vis.selectAll('.node')
+            .attr('transform', function(d){
+              return "translate(" + d.x + "," + d.y + ")";
+            });
+          global.vis.selectAll('.link')
+            .attr('x1', function (d) { return d.source.x; })
+            .attr('y1', function (d) { return d.source.y; })
+            .attr('x2', function (d) { return d.target.x; })
+            .attr('y2', function (d) { return d.target.y; });
+        });
+
+        // Gestione del drag
+        global.drag = global.force.drag()
+          .on('dragstart',function(d){
+            d.fixed = true;
+          });
+
+        // Funzione per verificare se l'elemento è modificabile
+        function isEditable(selection){
+          if(!selection) return 0;
+          return (graph.nodes.find(node => node.id === selection.id)) ? 1 :2;
+        }
+
+        // Funzione per verificare se l'id è disponibile
+        function isIdAvailable(selection, new_id, switch_id){
+          if(!selection) return false;
+          if(switch_id === 1){
+            if(selection.id === new_id) return true;
+            return !graph.nodes.find(node => node.id === new_id);
+          } 
+          else if(switch_id === 2){
+            if(selection.id === new_id) return true;
+            return !graph.edges.find(edge => edge.id === new_id);
+          }
+        }
+
+        // Funzione per applicare le modifiche
+        function submitChanges(selection){
+          const switch_id = isEditable(selection);
+
+          if (switch_id === 1) {
+            if (isIdAvailable(selection, document.getElementById("node_id").value, 1)) {
+                const modified_node = {
+                    id: document.getElementById("node_id").value,
+                    label: document.getElementById("node_label").value,
+                    x: selection.x,
+                    y: selection.y,
+                    type: document.getElementById("node_type").value
+                };
+                const connectedNodes = neighborsOfNode(selection);
+                graph.remove(selection);
+                graph.nodes.push(modified_node);
+                connectedNodes.forEach(node => graph.add_link(modified_node, node));
+            }
+        } else if (switch_id === 2) {
+            if (isAvailableId(selection, document.getElementById("node_id").value, 2)) {
+                graph.remove(selection);
+                graph.add_modified_link(selection.source, selection.target, document.getElementById("node_id").value, document.getElementById("node_label").value);
+            }
+            global.selection = null;
+            update();
+        }
+        }
+
+        function showEditor(selection_to_show){
+            const editableType = isEditable(selection_to_show);
+        document.getElementById("node_id").value = selection_to_show.id;
+        document.getElementById("node_label").value = selection_to_show.label;
+        document.getElementById("node_type").value = (editableType === 1) ? selection_to_show.type : "";
+    }
+  });
+
+  /*Funzione per gestire selezione nodo*/
   function handleNodeClick(d){
     global.selection=d;
     d3.selectAll('.node').classed('selected',d2 => d2===d);
     d3.selectAll('.link').classed('selected',false);
   }
 
+  /*Funzione per gestire selezione arco*/
   function handleEdgeClick(d){
     global.selection=d;
     d3.selectAll('.link').classed('selected', d2 => d2 === d);
     d3.selectAll('.node').classed('selected', false);
   }
-
 
   /*Funzione per disegnare un nuovo arco tra due nodi trascinando col mouse*/
   function addEdgeOnDrag(selection){
