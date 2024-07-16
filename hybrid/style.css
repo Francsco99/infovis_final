@@ -16,8 +16,7 @@ body {
     position: relative;
 }
 
-.toolbar-left,
-.toolbar-right {
+.toolbar-left, .toolbar-right {
     display: flex;
     align-items: center;
 }
@@ -65,6 +64,10 @@ footer{
 
 .toolbar-icon.unactive {
     color: #8D99AE;
+}
+
+.toolbar-extra {
+    position: relative;
 }
 
 .canvas-container {

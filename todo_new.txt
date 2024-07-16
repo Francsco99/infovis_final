@@ -4,10 +4,8 @@ opzionali
 -selezionare piu nodi insieme, occhio ai conflitti col pan, possiamo usare un tasto tipo control
 
 
-ivan 
--gestione library
+ivan
 -spostare stili
--rendere le etichette dei nodi non selezionabili
 -cambiare i nomi degli input e output delle statistiche
 frasal
 -gestione alert
