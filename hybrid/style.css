@@ -15,8 +15,7 @@ body {
     position: relative;
 }
 
-.toolbar-left,
-.toolbar-right {
+.toolbar-left, .toolbar-right {
     display: flex;
     align-items: center;
 }
@@ -57,6 +56,10 @@ body {
 
 .toolbar-icon.unactive {
     color: grey;
+}
+
+.toolbar-extra {
+    position: relative;
 }
 
 .canvas-container {
@@ -153,7 +156,7 @@ body {
     cursor: pointer;
 }
 
-.color-picker-toolbar {
+#color-picker-toolbar {
     position: absolute;
     display: flex;
     justify-content: center;
@@ -216,9 +219,7 @@ body {
     text-align: center;
 }
 
-
-
-.color-picker {
+#color-picker {
     display: flex;
     justify-content: center;
     gap: 10px;
