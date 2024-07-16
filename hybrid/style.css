@@ -11,7 +11,8 @@ body {
     justify-content: space-between;
     align-items: center;
     padding: 15px;
-    background-color: #ddd;
+    background-color: #EDF2F4;
+    border-bottom: 2px solid #2B2D42;
     position: relative;
 }
 
@@ -25,37 +26,44 @@ body {
     font-weight: bold;
 }
 
-.toolbar-right{
-    gap: 20px;
+.toolbar-right {
+    gap: 30px;
+}
+
+footer{
+    margin-bottom: 20px;
 }
 
 .toolbar-center {
     display: flex;
     justify-content: center;
     align-items: center;
-    gap: 30px; /* Aumenta lo spazio tra le icone */
+    gap: 30px;
     position: absolute;
     left: 50%;
     transform: translateX(-50%);
 }
 
-.toolbar-center .icon {
-    cursor: pointer;
+.toolbar-extra {
+    position: relative;
 }
 
-.toolbar-right button {
-    margin-left: 10px;
-    background: none;
-    border: none;
+.icon {
     cursor: pointer;
+    color: #2B2D42;
+    transition: transform 0.3s ease;
+}
+
+.icon:hover {
+    transform: scale(1.2);
 }
 
 .toolbar-icon.active {
-    color: red;
+    color: #D90429;
 }
 
 .toolbar-icon.unactive {
-    color: grey;
+    color: #8D99AE;
 }
 
 .toolbar-extra {
@@ -65,46 +73,34 @@ body {
 .canvas-container {
     position: relative;
     width: 100%;
-    height: calc(100vh - 100px);
+    flex-grow: 1;
     background-color: #fff;
-    padding: 20px; /* Aggiungi padding per distanziare dal bordo */
-    box-sizing: border-box; /* Assicura che il padding non aumenti la larghezza */
-    border: 2px solid #7a7a7a; /* Aggiunto bordo grigio intorno all'area del canvas */
+    padding: 20px;
+    box-sizing: border-box;
 }
 
 #graph-canvas {
     width: 100%;
     height: 100%;
     transform-origin: center;
-    fill: white;
 }
 
-.zoom-controls {
+.help-control {
     position: absolute;
-    bottom: 20px; /* Distanza dal bordo inferiore */
-    right: 20px; /* Distanza dal bordo destro */
+    bottom: 20px;
+    right: 20px;
     display: flex;
-    flex-direction: column;
 }
 
-.zoom-controls i {
+.help-control i {
     margin: 10px;
-    padding: 10px; /* Aumenta il padding per più spazio */
+    padding: 10px;
     background: none;
     border: none;
     cursor: pointer;
     display: flex;
     align-items: center;
     justify-content: center;
-}
-
-.icon{
-    color: black;
-    transition: transform 0.3s ease; /* Aggiunta transizione per effetto smooth */
-}
-
-.icon:hover{
-    transform: scale(1.2); /* Aumenta le dimensioni del 20% quando si passa sopra */
 }
 
 .popup {
@@ -114,7 +110,7 @@ body {
     left: 0;
     width: 100%;
     height: 100%;
-    background-color: rgba(0, 0, 0, 0.5); /* Sfondo trasparente */
+    background-color: rgba(0, 0, 0, 0.5);
     justify-content: center;
     align-items: center;
 }
@@ -127,7 +123,6 @@ body {
     max-width: 600px;
     position: relative;
     text-align: center;
-
 }
 
 .popup-content h2 {
@@ -165,30 +160,33 @@ body {
     padding: 10px;
     border-radius: 5px;
     box-shadow: 0 0 10px rgba(0, 0, 0, 0.2);
-    z-index: 99; /* Sotto la toolbar principale */
+    z-index: 99;
 }
 
 .color-option {
-    width: 40px; /* Dimensioni dei cerchi dei colori */
+    width: 40px;
     height: 40px;
     border-radius: 50%;
-    margin: 0 8px; /* Spaziatura tra le opzioni di colore */
+    margin: 0 8px;
     cursor: pointer;
-    /*border: 10px solid; /* Aggiungi un bordo ai cerchietti */
 }
 
 .node > circle {
     stroke-width: 4px;
+    cursor: pointer;
 }
 
-.link, .drag_link {
-    stroke-width: 5px;
-    stroke: black;
-    opacity: 0.3;
+.node > text{
+    cursor: pointer;
+}
+
+.link,
+.drag_link {
     cursor: pointer;
 }
 
 .drag_link {
+    stroke-width: 5px;
     stroke-linecap: round;
 }
 
@@ -201,22 +199,23 @@ body {
     stroke: black;
 }
 
-#node_id {
+#node_id,
+#node_label,
+#node_color {
     margin-inline: 5px;
-    width: 30px;
     text-align: center;
+}
+
+#node_id {
+    width: 30px;
 }
 
 #node_label {
-    margin-inline: 5px;
     width: 50px;
-    text-align: center;
 }
 
 #node_color {
-    margin-inline: 5px;
     width: 80px;
-    text-align: center;
 }
 
 #color-picker {
@@ -231,5 +230,4 @@ body {
     height: 30px;
     border-radius: 50%;
     cursor: pointer;
-   
 }

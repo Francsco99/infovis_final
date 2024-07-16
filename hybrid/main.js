@@ -1,17 +1,16 @@
-// Area di disegno
 const canvas = document.getElementById('graph-canvas');
 const width = canvas.clientWidth;
 const height = canvas.clientHeight;
 
-// Tool della toolbar in alto
-const saveSVG = document.getElementById('svg-download');
-const saveJSON = document.getElementById('json-download');
-const uploadJSON = document.getElementById('json-upload');
+// Seleziona gli input slider
+const chargeSlider = document.getElementById('charge');
+const linkSlider = document.getElementById('link');
+const attractSlider = document.getElementById('attract');
 
-const zoomIn = document.getElementById('zoom-in');
-const zoomOut = document.getElementById('zoom-out');
-
-//const colors = ['red', 'blue', 'green', 'yellow', 'purple']
+// Aggiungi event listener agli slider per aggiornare la simulazione quando i valori cambiano
+chargeSlider.addEventListener('input', updateForces);
+linkSlider.addEventListener('input', updateForces);
+attractSlider.addEventListener('input', updateForces);
 
 var global = {
   selection: null,
@@ -132,6 +131,7 @@ var graph = {
   })
 };
 
+
 function main() {
 
   graph.nodes = [
@@ -153,10 +153,9 @@ function main() {
 
   //populateGraph(100, 200);
 
+  var svg = d3.select('#graph-canvas').attr("fill","white");
 
-  var svg = d3.select('#graph-canvas');
 
-  // ZOOM and PAN
   container = svg.append('g');    
 
   global.vis = container.append('g');
@@ -165,14 +164,20 @@ function main() {
     global.vis.attr('transform', event.transform);
   });
 
-  zoomIn.addEventListener('click', () => {
-    container.transition().call(zoom.scaleBy, 1.2);
+  var zoom = d3.zoom()
+  .scaleExtent([0.5, 8])
+  .on('zoom', (event) => {
+    global.vis.attr('transform', event.transform);
   });
-  
-  zoomOut.addEventListener('click', () => {
-    container.transition().call(zoom.scaleBy, 0.8);
-  });
-  // create a rectangular overlay to catch events
+
+// Apply zoom behavior to the container
+svg.call(zoom);
+
+// Add event listener for mouse wheel zooming
+svg.on('wheel', (event) => {
+  event.preventDefault();
+  zoom.scaleBy(svg.transition().duration(50), Math.pow(2, event.deltaY * -0.002));
+});
 
   // WARNING rect size is huge but not infinite. this is a dirty hack
   global.vis.append('rect')
@@ -192,9 +197,10 @@ function main() {
   
   // Inizializzazione layout force directed
   global.simulation = d3.forceSimulation(graph.nodes)
-    .force("charge", d3.forceManyBody().strength(-300))
-    .force("link", d3.forceLink(graph.links).distance(100).id(d => d.id))
-    .force("attract", d3.forceRadial(0, width / 2, height / 2).strength(0.1)) // Forza che tende a tenere i nodi al centro
+    .force("charge", d3.forceManyBody().strength(+chargeSlider.value))
+    .force("link", d3.forceLink(graph.links).distance(+linkSlider.value).id(d => d.id))
+    .force("attract", d3.forceRadial(0, width / 2, height / 2).strength(+attractSlider.value)) // Forza che tende a tenere i nodi al centro
+
     .on("tick", () => {
       // Aggiornamento posizione nodi e archi
       global.vis.selectAll('.node')
@@ -225,6 +231,11 @@ function main() {
         if (!global.tempLine) {
           global.tempLine = global.vis.append('line')
             .attr('class', 'drag_link')
+            .attr('class', 'link')
+            .attr('stroke-width', '8px')
+            .attr('stroke', 'black')
+            .attr('opacity', '0.3')
+            .attr('stroke-linecap','round')
         }
         global.tempLine
           .attr('x1', d.x)
@@ -273,6 +284,9 @@ function update() {
 
   links.enter().insert('line', '.node') // Inserisci i link prima dei nodi
     .attr('class', 'link')
+    .attr('stroke-width', '8px')
+    .attr('stroke', 'black')
+    .attr('opacity', '0.3')
     .on('click', function(event, d) {
       // selezione dell'arco
       global.selection = d;
@@ -308,15 +322,14 @@ function update() {
     });
 
   nodes_enter.append('circle')
-    .attr('r', 20)
-    .attr('fill', d => global.colorify(d.type))
-    .attr('cursor', 'pointer');
+    .attr('r', 25)
+    .attr('fill', d => global.colorify(d.type));
 
   nodes_enter.append('text')
     .attr('text-anchor', 'middle')
     .attr('user-select', 'none')
     .attr('dy', '.35em')
-    .attr('cursor', 'pointer')
+    .attr('font-size',"20px")
     .text(d => d.label);
 
   nodes.exit().remove();
@@ -424,6 +437,36 @@ d3.select("#delete")
     }
   });
 
+d3.select("#delete-graph")
+  .on("click", function() {
+    // Mostra l'alert di conferma
+    swal({
+      title: "Are you sure to remove the graph?",
+      text: "Once deleted, you will not be able to recover this graph!",
+      icon: "warning",
+      buttons: true,
+      dangerMode: true,
+    })
+    .then((willDelete) => {
+      if (willDelete) {
+        swal("Your graph has been deleted!", {
+          icon: "success",
+          timer: 2000,
+          buttons: false
+        });
+        graph.nodes = [];
+        graph.links = [];
+        update();
+      } else {
+        swal("The graph is unchanged!", {
+          timer: 2000,
+          buttons: false
+        });
+        return
+        }
+    });
+  });  
+
 function selectionType(selection){
   if (selection !== null) {
     if (graph.nodes.indexOf(selection) >= 0) {
@@ -466,7 +509,7 @@ function submit_changes(selection) {
     $(".toolbar-left").html(`
       <div class="edit-form">
           <label for="node_id">ID:</label>
-          <span id="node_id">${selection.id} </span>
+          <span id="node_id">${selection.id}</span>
           <label for="node_label">LABEL:</label>
           <input type="text" id="node_label" size="4" value="${selection.label}" />
           <label for="node_color">COLOR:</label>
@@ -477,38 +520,37 @@ function submit_changes(selection) {
               <option value="violet" ${selection.type === "violet" ? "selected" : ""}>Violet</option>
               <option value="orange" ${selection.type === "orange" ? "selected" : ""}>Orange</option>
           </select>
-          <button id="edit-save">Save</button>
       </div>
     `);
-    $("#edit-save").on("click", () => {
+    
+    $("#node_label").on("input", () => {
       selection.label = document.getElementById("node_label").value;
+      update();
+    });
+    
+    $("#node_color").on("change", () => {
       selection.type = document.getElementById("node_color").value;
       update();
-      return true;
     });
 
   } else if (mode === "link") {
     $(".toolbar-left").html(`
       <div class="edit-form">
           <label for="node_id">ID:</label>
-          <span id="node_id">${selection.id} </span>
+          <span id="node_id">${selection.id}</span>
           <label for="node_label">LABEL:</label>
           <input type="text" id="node_label" size="4" value="${selection.label}" />
-          <button id="edit-save">Save</button>
       </div>
-  `);
-    $("#edit-save").on("click", () => {
+    `);
+    
+    $("#node_label").on("input", () => {
       selection.label = document.getElementById("node_label").value;
       update();
-      return true;
     });
-
-    } else {
-      alert("Errore, l'id selezionato è già in uso");
-      return false;
-    }
-    return false;
   }
+  
+  return false;
+}
 
 function visualizeStatistics(id,label,color){
   document.querySelector('.toolbar-left').innerHTML = `
@@ -517,6 +559,36 @@ function visualizeStatistics(id,label,color){
             <span>COLOR: ${color}</span>
   `;
 }
+
+
+d3.select("#svg-download")
+  .on("click", function () {
+    const serializer = new XMLSerializer();
+    const svgString = serializer.serializeToString(document.querySelector('svg'));
+    const blob = new Blob([svgString], { type: "image/svg+xml;charset=utf-8" });
+    saveAs(blob, "graph.svg");
+  });
+
+d3.select("#json-download")
+  .on("click", function () {
+    const json = JSON.stringify({ nodes: graph.nodes, links: graph.links });
+    const blob = new Blob([json], { type: "application/json" });
+    saveAs(blob, "graph.json");
+  });
+
+  function updateForces() {
+    const chargeValue = +chargeSlider.value;
+    const linkDistance = +linkSlider.value;
+    const attractStrength = +attractSlider.value;
+
+    global.simulation
+        .force("charge", d3.forceManyBody().strength(chargeValue))
+        .force("link", d3.forceLink(graph.links).distance(linkDistance).id(d => d.id))
+        .force("attract", d3.forceRadial(0, width / 2, height / 2).strength(attractStrength))
+        .alpha(1)
+        .restart();
+  }
+
 
 function populateGraph(numNodes, numLinks){
   // Creazione dei nodi

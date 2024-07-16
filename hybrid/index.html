@@ -18,14 +18,17 @@
     <script src="https://d3js.org/d3.v7.min.js"></script>
     <!--jquery library-->
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <!--alert-->
     <script src="https://unpkg.com/sweetalert/dist/sweetalert.min.js"></script>
+    <!--file saver-->
+    <script src="http://cdn.jsdelivr.net/g/filesaver.js"></script>
 </head>
 <body>
     <div class="toolbar">
         <div class="toolbar-left">
-            <span>ID: </span>
-            <span>LABEL: </span>
-            <span>COLOR: </span>
+            <span class="label">ID: </span>
+            <span class="label">LABEL: </span>
+            <span class="label">COLOR: </span>
         </div>
         <div class="toolbar-center">
             <i id="pointer" class="icon toolbar-icon active fa-solid fa-arrow-pointer fa-2xl" data-tool="pointer"></i>
@@ -33,23 +36,20 @@
             <i id="add-link" class="icon toolbar-icon fa-solid fa-link fa-2xl" data-tool="add-link"></i>
             <i id="edit" class="icon unactive toolbar-icon fa-solid fa-pen-to-square fa-2xl" data-tool="edit"></i>
             <i id="delete" class="icon unactive toolbar-icon fa-solid fa-eraser fa-2xl" data-tool="delete"></i>
-            <i id="help-icon" class="icon fa-solid fa-circle-question fa-2xl"></i>
         </div>
-
         <div class="toolbar-right">
-            <i class="icon fa-solid fa-trash fa-2xl"></i>
-            <button id="svg-download" class="icon"><i class="fa-solid fa-camera fa-2xl"></i></button>
-            <button id="json-download" class="icon"><i class="fa-solid fa-floppy-disk fa-2xl"></i></button>
-            <button id="json-upload" class="icon"><i class="fa-solid fa-file-arrow-up fa-2xl"></i></button>
+            <i id="delete-graph" class="icon toolbar-icon fa-solid fa-trash fa-2xl"></i>
+            <i id="svg-download" class="icon toolbar-icon fa-solid fa-camera fa-2xl"></i>
+            <i id="json-download" class="icon toolbar-icon fa-solid fa-floppy-disk fa-2xl"></i>
+            <i id="json-upload" class="icon toolbar-icon fa-solid fa-file-arrow-up fa-2xl"></i>
         </div>
     </div>
     <div id="toolbar-extra"></div>
     <div class="canvas-container">
         <svg id="graph-canvas"></svg>
         
-        <div class="zoom-controls">
-            <i id="zoom-in" class="icon fa-solid fa-magnifying-glass-plus fa-xl"></i>
-            <i id="zoom-out" class="icon fa-solid fa-magnifying-glass-minus fa-xl"></i>
+        <div class="help-control">
+            <i id="help-icon" class="icon fa-solid fa-circle-question fa-2xl"></i>
         </div>
     </div>
     <div id="popup" class="popup">
@@ -57,27 +57,28 @@
             <i id="close-popup" class="icon fa-solid fa-xmark fa-2xl"></i>
             <h2>Instructions</h2>
             <ul>
-                <li><i class="fa-solid fa-arrow-pointer fa-xl"></i> Select an element</li>
-                <li><i class="fa-solid fa-circle-plus fa-xl"></i> Add a new node</li>
-                <li><i class="fa-solid fa-link fa-xl"></i> Add a new link</li>
-                <li><i class="fa-solid fa-pen-to-square fa-xl"></i> Edit node or link</li>
-                <li><i class="fa-solid fa-eraser fa-xl"></i> Delete node or link</li>
-                <li><i class="fa-solid fa-circle-question fa-xl"></i>Show this guide</li>
-                <li><i class="fa-solid fa-camera fa-xl"></i> Download the graph in SVG</li>
-                <li><i class="fa-solid fa-floppy-disk fa-xl"></i> Download the graph in JSON</li>
-                <li><i class="fa-solid fa-file-arrow-up fa-xl"></i> Upload the graph in JSON</li>
-                <li><i class="fa-solid fa-magnifying-glass-plus fa-xl"></i> Zoom In</li>
-                <li><i class="fa-solid fa-magnifying-glass-minus fa-xl"></i> Zoom Out</li>
+                <li><i class="fa-solid fa-arrow-pointer fa-2xl"></i> Select and grab an element</li>
+                <li><i class="fa-solid fa-circle-plus fa-2xl"></i> Add a new node</li>
+                <li><i class="fa-solid fa-link fa-2xl"></i> Add a new link</li>
+                <li><i class="fa-solid fa-pen-to-square fa-2xl"></i> Edit node or link</li>
+                <li><i class="fa-solid fa-eraser fa-2xl"></i> Delete node or link</li>
+                <li><i class="fa-solid fa-circle-question fa-2xl"></i>Show this guide</li>
+                <li><i class="fa-solid fa-trash fa-2xl"></i>Delete whole graph</li>
+                <li><i class="fa-solid fa-camera fa-2xl"></i> Download the graph in SVG</li>
+                <li><i class="fa-solid fa-floppy-disk fa-2xl"></i> Download the graph in JSON</li>
+                <li><i class="fa-solid fa-file-arrow-up fa-2xl"></i> Upload the graph in JSON</li>
             </ul>
         </div>
     </div>
-    <!--
-    <script src="js/info_popup.js"></script>
-    <script src="js/icon_click.js"></script>
-    <script src="js/download.js"></script>
-    <script src="js/zoom_control.js"></script>
-    <script src="js/color_picker.js"></script>
-    -->
+    <footer><div class="toolbar-force-slider">
+        <label for="charge">Charge: </label>
+        <input id="charge" type="range" min="-600" max="-100" step="25" value="-300">
+        <label for="link">Link distance: </label>
+        <input id="link" type="range" min="30" max="200" step="25" value="100">
+        <label for="attract">Center gravity: </label>
+        <input id="attract" type="range" min="0" max="0.5" step="0.05" value="0.1">
+    </div></footer>
     <script src="main.js"></script>
+    <script src="info_popup.js"></script>
 </body>
 </html>
