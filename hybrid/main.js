@@ -1,4 +1,3 @@
-
 // Area di disegno
 const canvas = document.getElementById('graph-canvas');
 const width = canvas.clientWidth;
@@ -8,10 +7,11 @@ const height = canvas.clientHeight;
 const saveSVG = document.getElementById('svg-download');
 const saveJSON = document.getElementById('json-download');
 const uploadJSON = document.getElementById('json-upload');
+
 const zoomIn = document.getElementById('zoom-in');
 const zoomOut = document.getElementById('zoom-out');
 
-const colors = ['red', 'blue', 'green', 'yellow', 'purple']
+//const colors = ['red', 'blue', 'green', 'yellow', 'purple']
 
 var global = {
   selection: null,
@@ -22,9 +22,6 @@ var global = {
 var graph = {
   nodes: [],
   edges: [],
-
-  last_index: 5,
-  links_index: 6,
 
   objectify: function() {
     const idToNodeMap = new Map();
@@ -218,8 +215,6 @@ function main() {
       d3.selectAll('.link').classed('selected', false);
     });
 
-  // END ZOOM and PAN
-
   global.colorify = d3.scaleOrdinal(d3.schemeCategory10);
   
   // Inizializzazione layout force directed
@@ -374,8 +369,10 @@ function update() {
 
 d3.select(window).on('click', function () {
   if (global.selection !== null) {
-    d3.select("#delete").attr("class", "icon active toolbar-icon fa-solid fa-eraser fa-2xl");
-    d3.select("#edit").attr("class", "icon active toolbar-icon fa-solid fa-pen-to-square fa-2xl");
+    d3.select("#delete").classed('active', true);
+    d3.select("#delete").classed('unactive', false);
+    d3.select("#edit").classed('active', true);
+    d3.select("#edit").classed('unactive', false);
   }
   else {
     d3.select("#delete").classed('active', false);
@@ -402,7 +399,7 @@ d3.select("#add-node")
   .on("click", function () {
     const color = "blue";
     if (color) {
-      const newNode = graph.add_node(color);
+      graph.add_node(color);
       update();
     }
   });
@@ -433,7 +430,7 @@ d3.select("#delete")
     }
   });
 
-function isEditable(selection){
+function selectionType(selection){
   if (selection !== null) {
     if (graph.nodes.indexOf(selection) >= 0) {
       return "node";
@@ -470,11 +467,11 @@ function isAvailableId(selection, new_id, mode) {
 }
 
 function submit_changes(selection) {
-  const mode = isEditable(selection);
+  const mode = selectionType(selection);
 
   if (mode === "node") {
     if (isAvailableId(selection, document.getElementById("node_id").value, mode)) {
-      selection.id = document.getElementById("node_id").value;
+      //selection.id = document.getElementById("node_id").value;
       selection.label = document.getElementById("node_label").value;
       selection.type = document.getElementById("node_type").value;
       update();
@@ -485,14 +482,14 @@ function submit_changes(selection) {
     }
   } else if (mode === "link") {
     if (isAvailableId(selection, document.getElementById("node_id").value, mode)) {
-      const sourceNode = selection.source;
-      const targetNode = selection.target;
 
       // Rimuovi l'arco
-      graph.remove(selection);
+      //graph.remove(selection);
 
       // Aggiungi l'arco modificato
-      graph.add_modified_link(sourceNode, targetNode, document.getElementById("node_id").value, document.getElementById("node_label").value);
+      //graph.add_modified_link(sourceNode, targetNode, document.getElementById("node_id").value, document.getElementById("node_label").value);
+
+      selection.label = document.getElementById("node_label").value;
 
       update();
       return true;
