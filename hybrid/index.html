@@ -16,21 +16,11 @@
     <script src="https://unpkg.com/sweetalert/dist/sweetalert.min.js"></script>
 </head>
 <body onload="main()">
-    <header>
-        <h1>Spring Embedder Graph Drawing Tool</h1>
-    </header>
     <div class="toolbar">
         <div class="toolbar-left">
-            <span>ID: </span><input id="node_id"></input>
-            <span>LABEL: </span><input id="node_label"></input>
+            <span>ID: </span>
+            <span>LABEL: </span>
             <span>COLOR: </span>
-            <select id="node_type" class="editInput">
-                <option style="display:none"></option>
-                <option value="blue">Blue</option>
-                <option value="orange">Orange</option>
-                <option value="green">Green</option>
-                <option value="red">Red</option>
-            </select>
         </div>
         <div class="toolbar-center">
             <i id="pointer" class="icon toolbar-icon active fa-solid fa-arrow-pointer fa-2xl" data-tool="pointer"></i>
@@ -47,6 +37,7 @@
             <button id="json-upload" class="icon"><i class="fa-solid fa-file-arrow-up fa-2xl"></i></button>
         </div>
     </div>
+    <div class="toolbar-extra"></div>
     <div class="canvas-container">
         <svg id="graph-canvas"></svg>
         
