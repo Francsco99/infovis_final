@@ -18,14 +18,17 @@
     <script src="https://d3js.org/d3.v7.min.js"></script>
     <!--jquery library-->
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <!--alert-->
     <script src="https://unpkg.com/sweetalert/dist/sweetalert.min.js"></script>
+    <!--file saver-->
+    <script src="http://cdn.jsdelivr.net/g/filesaver.js"></script>
 </head>
-<body onload="main()">
+<body>
     <div class="toolbar">
         <div class="toolbar-left">
-            <span>ID: </span>
-            <span>LABEL: </span>
-            <span>COLOR: </span>
+            <span class="label">ID: </span>
+            <span class="label">LABEL: </span>
+            <span class="label">COLOR: </span>
         </div>
         <div class="toolbar-center">
             <i id="pointer" class="icon toolbar-icon active fa-solid fa-arrow-pointer fa-2xl" data-tool="pointer"></i>
@@ -38,9 +41,9 @@
 
         <div class="toolbar-right">
             <i class="icon fa-solid fa-trash fa-2xl"></i>
-            <button id="svg-download" class="icon"><i class="fa-solid fa-camera fa-2xl"></i></button>
-            <button id="json-download" class="icon"><i class="fa-solid fa-floppy-disk fa-2xl"></i></button>
-            <button id="json-upload" class="icon"><i class="fa-solid fa-file-arrow-up fa-2xl"></i></button>
+            <i id="svg-download" class="icon toolbar-icon fa-solid fa-camera fa-2xl"></i>
+            <i id="json-download" class="icon toolbar-icon fa-solid fa-floppy-disk fa-2xl"></i>
+            <i id="json-upload" class="icon toolbar-icon fa-solid fa-file-arrow-up fa-2xl"></i>
         </div>
     </div>
     <div class="toolbar-extra"></div>
@@ -79,5 +82,6 @@
     <script src="js/color_picker.js"></script>
     -->
     <script src="main.js"></script>
+    <script src="info_popup.js"></script>
 </body>
 </html>

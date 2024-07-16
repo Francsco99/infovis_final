@@ -1,12 +1,6 @@
-// Area di disegno
 const canvas = document.getElementById('graph-canvas');
 const width = canvas.clientWidth;
 const height = canvas.clientHeight;
-
-// Tool della toolbar in alto
-const saveSVG = document.getElementById('svg-download');
-const saveJSON = document.getElementById('json-download');
-const uploadJSON = document.getElementById('json-upload');
 
 const zoomIn = document.getElementById('zoom-in');
 const zoomOut = document.getElementById('zoom-out');
@@ -154,7 +148,7 @@ function main() {
   graph.objectify();
 
   var svg = d3.select('#graph-canvas');
-
+  svg.attr("fill","white");
   // ZOOM and PAN
   container = svg.append('g');    
 
@@ -272,6 +266,9 @@ function update() {
 
   links.enter().insert('line', '.node') // Inserisci i link prima dei nodi
     .attr('class', 'link')
+    .attr('stroke-width', '8px')
+    .attr('stroke', 'black')
+    .attr('opacity', '0.3')
     .on('click', function(event, d) {
       // selezione dell'arco
       global.selection = d;
@@ -307,15 +304,14 @@ function update() {
     });
 
   nodes_enter.append('circle')
-    .attr('r', 20)
-    .attr('fill', d => global.colorify(d.type))
-    .attr('cursor', 'pointer');
+    .attr('r', 25)
+    .attr('fill', d => global.colorify(d.type));
 
   nodes_enter.append('text')
     .attr('text-anchor', 'middle')
     .attr('user-select', 'none')
     .attr('dy', '.35em')
-    .attr('cursor', 'pointer')
+    .attr('font-size',"20px")
     .text(d => d.label);
 
   nodes.exit().remove();
@@ -501,3 +497,19 @@ function visualizeStatistics(id,label,color){
             <span>COLOR: ${color}</span>
   `;
 }
+
+d3.select("#svg-download")
+  .on("click", function () {
+    const serializer = new XMLSerializer();
+    const svgString = serializer.serializeToString(document.querySelector('svg'));
+    const blob = new Blob([svgString], { type: "image/svg+xml;charset=utf-8" });
+    saveAs(blob, "graph.svg");
+  });
+
+d3.select("#json-download")
+  .on("click", function () {
+    const json = JSON.stringify({ nodes: graph.nodes, edges: graph.edges });
+    const blob = new Blob([json], { type: "application/json" });
+    saveAs(blob, "graph.json");
+  });
+main();

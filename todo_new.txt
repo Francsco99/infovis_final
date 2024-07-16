@@ -18,4 +18,3 @@ fraspez
 -stile della pagina html
 -aggiungere slider forza
 -zoom con rotella
--popup iniziale
