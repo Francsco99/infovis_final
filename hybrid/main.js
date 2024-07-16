@@ -153,6 +153,8 @@ function main() {
 
   graph.objectify();
 
+  //populateGraph(100, 200);
+
   var svg = d3.select('#graph-canvas').attr("fill","white");
 
   container = svg.append('g');    
@@ -369,36 +371,51 @@ d3.select("#pointer")
     .on("click", function () {
       global.tool = "pointer";
       d3.select("#pointer").classed('active', true);
+      d3.select("#add-node").classed('active', false);
       d3.select("#add-link").classed('active', false);
+      hideLibrary();
     });
 
 // Gestione strumenti della toolbar
 d3.select("#add-node")
   .on("click", function () {
-    $(".toolbar-extra").html(`
-      <div class="color-picker">
-          <div class="color-option" data-color="red" style="background-color:`+global.colorify("red")+` ;"></div>
-          <div class="color-option" data-color="blue" style="background-color: `+global.colorify("blue")+`;"></div>
-          <div class="color-option" data-color="green" style="background-color: `+global.colorify("green")+`;"></div>
-          <div class="color-option" data-color="violet" style="background-color: `+global.colorify("violet")+`;"></div>
-          <div class="color-option" data-color="orange" style="background-color: `+global.colorify("orange")+`;"></div>
-      </div>
-        `);
-    //const color = "blue";
-    $(".color-option").on("click", function() {
-      const color = $(this).data("color");
-      if (color) {
-        graph.add_node(color);
-        update();
-      }
-      });
+    global.tool = "add-node";
+    d3.select("#pointer").classed('active', false);
+    d3.select("#add-node").classed('active', true);
+    d3.select("#add-link").classed('active', false);
+
+    showLibrary();
   });
+
+function showLibrary() {
+  $("#toolbar-extra").html(`
+    <div id="color-picker">
+        <div class="color-option" data-color="red" style="background-color: ` + global.colorify("red") + ` ;"></div>
+        <div class="color-option" data-color="blue" style="background-color: ` + global.colorify("blue") + ` ;"></div>
+        <div class="color-option" data-color="green" style="background-color: ` + global.colorify("green") + ` ;"></div>
+        <div class="color-option" data-color="violet" style="background-color: ` + global.colorify("violet") + ` ;"></div>
+        <div class="color-option" data-color="orange" style="background-color: ` + global.colorify("orange") + ` ;"></div>
+    </div>`);
+  $(".color-option").on("click", function() {
+    const color = $(this).data("color");
+    if (color) {
+      graph.add_node(color);
+      update();
+    }
+    });
+}
+
+function hideLibrary() {
+  $("#toolbar-extra").html(``);
+}
 
 d3.select("#add-link")
   .on("click", function () {
     global.tool = "add-link";
-    d3.select("#add-link").classed('active', true);
     d3.select("#pointer").classed('active', false);
+    d3.select("#add-node").classed('active', false);
+    d3.select("#add-link").classed('active', true);
+    hideLibrary();
   });
 
 d3.select("#edit")
@@ -492,7 +509,7 @@ function submit_changes(selection) {
     $(".toolbar-left").html(`
       <div class="edit-form">
           <label for="node_id">ID:</label>
-          <span id="node_id">${selection.id} </span>
+          <span id="node_id">${selection.id}</span>
           <label for="node_label">LABEL:</label>
           <input type="text" id="node_label" size="4" value="${selection.label}" />
           <label for="node_color">COLOR:</label>
@@ -503,38 +520,37 @@ function submit_changes(selection) {
               <option value="violet" ${selection.type === "violet" ? "selected" : ""}>Violet</option>
               <option value="orange" ${selection.type === "orange" ? "selected" : ""}>Orange</option>
           </select>
-          <button id="edit-save">Save</button>
       </div>
     `);
-    $("#edit-save").on("click", () => {
+    
+    $("#node_label").on("input", () => {
       selection.label = document.getElementById("node_label").value;
+      update();
+    });
+    
+    $("#node_color").on("change", () => {
       selection.type = document.getElementById("node_color").value;
       update();
-      return true;
     });
 
   } else if (mode === "link") {
     $(".toolbar-left").html(`
       <div class="edit-form">
           <label for="node_id">ID:</label>
-          <span id="node_id">${selection.id} </span>
+          <span id="node_id">${selection.id}</span>
           <label for="node_label">LABEL:</label>
           <input type="text" id="node_label" size="4" value="${selection.label}" />
-          <button id="edit-save">Save</button>
       </div>
-  `);
-    $("#edit-save").on("click", () => {
+    `);
+    
+    $("#node_label").on("input", () => {
       selection.label = document.getElementById("node_label").value;
       update();
-      return true;
     });
-
-    } else {
-      alert("Errore, l'id selezionato è già in uso");
-      return false;
-    }
-    return false;
   }
+  
+  return false;
+}
 
 function visualizeStatistics(id,label,color){
   document.querySelector('.toolbar-left').innerHTML = `
@@ -559,28 +575,6 @@ d3.select("#json-download")
     saveAs(blob, "graph.json");
   });
 
-  function createRandomGraph(){
-    // Creazione dei nodi
-    for (let i = 1; i <= 50; i++) {
-      graph.add_node(['red', 'blue', 'green', 'violet', 'orange'][Math.floor(Math.random() * 5)] ); // Assegna un colore casuale
-  }
-
-    // Creazione degli archi
-    let edgeCount = 0;
-    while (edgeCount < 30) {
-      const sourceIndex = Math.floor(Math.random() * graph.nodes.length);
-      const targetIndex = Math.floor(Math.random() * graph.nodes.length);
-      const source = graph.nodes[sourceIndex];
-      const target = graph.nodes[targetIndex];
-
-      // Evita autocollegamenti e duplicati
-      if (source !== target && !graph.links.some(e => (e.source === source.id && e.target === target.id) || (e.source === target.id && e.target === source.id))) {
-        graph.add_link(source,target);
-        edgeCount++;
-      }
-    }
-  }
-
   function updateForces() {
     const chargeValue = +chargeSlider.value;
     const linkDistance = +linkSlider.value;
@@ -594,6 +588,39 @@ d3.select("#json-download")
         .restart();
   }
 
-//createRandomGraph();
-console.log(graph.nodes+""+graph.links);
+function populateGraph(numNodes, numLinks){
+  // Creazione dei nodi
+  for (let i = 1; i <= numNodes; i++) {
+    graph.add_node(['red', 'blue', 'green', 'violet', 'orange'][Math.floor(Math.random() * 5)] ); // Assegna un colore casuale
+}
+  
+  // Creazione degli archi
+  let edgeCount = 0;
+  while (edgeCount < numLinks) {
+    const sourceIndex = Math.floor(Math.random() * graph.nodes.length);
+    const targetIndex = Math.floor(Math.random() * graph.nodes.length);
+    const source = graph.nodes[sourceIndex];
+    const target = graph.nodes[targetIndex];
+
+    console.log(source + " " + target);
+
+    var valid = true;
+    // Evita autocollegamenti e duplicati
+    if (sourceIndex !== targetIndex) {
+      for (i = 0; i < graph.links.length; i++) {
+        link = graph.links[i];
+        if (link.source === source && link.target === target || link.source === target && link.target === source) {
+          valid = false;
+          break;
+        }
+      }
+      if (valid) {
+        graph.add_link(source, target);
+        edgeCount++;
+      }
+    }
+  }
+  return 
+}
+
 main();

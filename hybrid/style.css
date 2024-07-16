@@ -45,6 +45,10 @@ footer{
     transform: translateX(-50%);
 }
 
+.toolbar-extra {
+    position: relative;
+}
+
 .icon {
     cursor: pointer;
     color: #2B2D42;
@@ -144,7 +148,7 @@ footer{
     cursor: pointer;
 }
 
-.color-picker-toolbar {
+#color-picker-toolbar {
     position: absolute;
     display: flex;
     justify-content: center;
@@ -211,7 +215,7 @@ footer{
     width: 80px;
 }
 
-.color-picker {
+#color-picker {
     display: flex;
     justify-content: center;
     gap: 10px;
