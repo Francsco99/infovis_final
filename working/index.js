@@ -26,23 +26,23 @@
       nodes: [
         {
           id: '1',
-          label:"a",
+          label:"1",
           type: 'blue'
         }, {
           id: '2',
-          label:"b",
+          label:"2",
           x: 793,
           y: 364,
           type: 'blue'
         }, {
           id: '3',
-          label:"c",
+          label:"3",
           x: 442,
           y: 365,
           type: 'orange'
         }, {
           id: '4',
-          label:"d",
+          label:"4",
           x: 467,
           y: 314,
           type: 'green'
@@ -53,27 +53,27 @@
           id:"1",
           source: '1',
           target: '2',
-          label:"a->b",
+          label:"1->2",
         }, {
           id:"2",
           source: '2',
           target: '3',
-          label:"B->C",
+          label:"2->3",
         }, {
           id:"3",
           source: '3',
           target: '1',
-          label:"c->a",
+          label:"1->3",
         }, {
           id:"4",
           source: '4',
           target: '1',
-          label:"d->a",
+          label:"1->4",
         }, {
           id:"5",
           source: '4',
           target: '2',
-          label:"d->b",
+          label:"2->4",
         }
       ],
   
@@ -112,6 +112,7 @@
         // remove the given node or link from the graph, also deleting dangling edges if a node is removed
         if (__indexOf.call(graph.nodes, condemned) >= 0) {
           graph.nodes = graph.nodes.filter(function(n) {
+            //graph.last_index = condemned.id;
             return n !== condemned;
           });
           return graph.edges = graph.edges.filter(function(l) {
@@ -128,17 +129,36 @@
   
       add_node: (function(type) {
         var newNode;
+      
+        // Gather all existing node IDs and filter out non-integer IDs
+        var existingIds = graph.nodes
+          .map(function(n) { return parseInt(n.id, 10); })
+          .filter(function(id) { return !isNaN(id); });
+          
+        existingIds.sort(function(a, b) { return a - b; });
+      
+        // Find the first missing ID in the sequence
+        var newId = existingIds.length ? existingIds[existingIds.length - 1] + 1 : 1; // start with 1
+        for (var i = 0; i < existingIds.length; i++) {
+          if (existingIds[i] !== i + 1) { // IDs should start from 1
+            newId = i + 1;
+            break;
+          }
+        }
+      
         newNode = {
-          id: graph.last_index++,
-          label:"node: "+ graph.last_index,
+          id: newId.toString(),
+          label: newId,
           x: width / 2,
           y: height / 2,
           type: type
         };
-        //mette il nodo nel grafo
+      
+        // Add the new node to the graph
         graph.nodes.push(newNode);
         return newNode;
       }),
+      
   
       add_link: (function(source, target) {
         // avoid edges to self
@@ -150,14 +170,32 @@
         // avoid link duplicates
         for (i = 0; i < edges.length; i++) {
           edge = edges[i];
-          if (edge.source === source && edge.target === target) {
-            alert("errore: arco duplicato");
+          if (edge.source === source && edge.target === target || edge.source === target && edge.target === source) {
+            swal({
+              title: "Error!",
+              text: "There is already a link",
+              icon: "error",
+              timer: 2000,
+              buttons: false
+            });
             return null;
+          }
+        }
+        // Gather all existing edges IDs
+        var existingIds = edges.map(function(n) { return parseInt(n.id, 10); });
+        existingIds.sort(function(a, b) { return a - b; });
+        
+        // Find the first missing ID in the sequence
+        var newId = existingIds.length ? existingIds[existingIds.length - 1] + 1 : 1; // start with 1
+        for (var i = 0; i < existingIds.length; i++) {
+          if (existingIds[i] !== i + 1) { // IDs should start from 1
+            newId = i + 1;
+            break;
           }
         }
   
         newEdge = {
-          id: graph.links_index++,
+          id: newId.toString(),
           label:source.id + "->" + target.id,
           source: source,
           target: target
@@ -198,10 +236,18 @@
   
       svg = d3.select('.mainArea');
 
+      // function for Reset editor
+      function resetEditor() {
+        document.getElementById("node_id").value = "";
+        document.getElementById("node_label").value = "";
+        document.getElementById("node_type").value = "";
+      }
+
+
       // Initialize editor at first open
-      document.getElementById("node_id").value = "";
-      document.getElementById("node_label").value = "";
-      document.getElementById("node_type").value = "";
+      resetEditor()
+
+      
 
       // ZOOM and PAN
       // create container elements
@@ -248,6 +294,8 @@
   
       // DRAG
       global.drag = global.force.drag().on('dragstart');
+
+
   
       function isEditable(selection){
         if (selection !== null) {
@@ -287,12 +335,129 @@
           }
         }
       }
-  
+
+      // Function to check if a label is available in the list of edges. Returns true if available, false if already used or invalid
+      function isAvailableLabel(selection, new_label) {
+        if (selection.label === new_label) {
+          return true;
+        } else {
+          // Create a variable containing all edges and their reversed versions
+          let graph_edges_labels_with_reverse = [];
+
+          for (let i = 0; i < graph.edges.length; i++) {
+            const originalLabel = graph.edges[i].label;
+            const [source, target] = originalLabel.split('->');
+            const reversedLabel = `${target}->${source}`;
+
+            graph_edges_labels_with_reverse.push(originalLabel);
+            graph_edges_labels_with_reverse.push(reversedLabel);
+          }
+
+          // Check if the new label is already present in the list
+          if (graph_edges_labels_with_reverse.includes(new_label)) {
+            swal({
+              title: "Error!",
+              text: `The new label is already in the graph`,
+              icon: "error",
+              timer: 2000,
+              buttons: false
+            });
+            return false;
+          }
+
+          // Check if the new label is in the correct format: first_node->second_node
+          const parts = new_label.split('->');
+          if (parts.length !== 2) {
+            swal({
+              title: "Error!",
+              text: `The label must be in the format "first_node->second_node"`,
+              icon: "error",
+              timer: 2000,
+              buttons: false
+            });
+            return false;
+          }
+
+          const [first_node, second_node] = parts;
+
+          // Check if the first part is the same as the second part
+          if (first_node === second_node) {
+            swal({
+              title: "Error!",
+              text: `The first node and the second node cannot be the same`,
+              icon: "error",
+              timer: 2000,
+              buttons: false
+            });
+            return false;
+          }
+
+          // Check if a node with id "first_node" exists
+          const firstPartExists = graph.nodes.some(node => node.id === first_node);
+          if (!firstPartExists) {
+            swal({
+              title: "Error!",
+              text: `The node "${first_node}" does not exist`,
+              icon: "error",
+              timer: 2000,
+              buttons: false
+            });
+            return false;
+          }
+
+          // Check if a node with id "second_node" exists
+          const secondPartExists = graph.nodes.some(node => node.id === second_node);
+          if (!secondPartExists) {
+            swal({
+              title: "Error!",
+              text: `The node "${second_node}" does not exist`,
+              icon: "error",
+              timer: 2000,
+              buttons: false
+            });
+            return false;
+          }
+
+          // If all checks are passed, return true
+          return true;
+        }
+      }
+
+      function unselect_all() {
+        d3.selectAll('.node').classed('selected', false);
+        d3.selectAll('.link').classed('selected', false);
+        global.slection = null;
+        return
+      }
+
+
       function submit_changes(selection) {
-  
+
         const mode = isEditable(selection);
-  
+
+        if (document.getElementById("node_id").value === "") {
+          swal({
+            title: "Error!",
+            text: "The Id field cannot be null",
+            icon: "error",
+            timer: 2000,
+            buttons: false
+          });
+          update();
+          return
+        }
+
         if (mode === "node") {
+          if(document.getElementById("node_label").value === "") {
+            swal({
+              title: "Error!",
+              text: "The Label field cannot be null",
+              icon: "error",
+              timer: 2000,
+              buttons: false
+            });
+            return
+          }
           if (isAvailableId(selection, document.getElementById("node_id").value, "node")) {
             let modified_node = {
               id: document.getElementById("node_id").value,
@@ -307,17 +472,61 @@
             for (let i = 0; i < connectedNodes.length; i++) {
               graph.add_link(modified_node, connectedNodes[i]);
             }
+            swal({
+              title: "Done!",
+              text: "The node has been modified",
+              icon: "success",
+              timer: 2000,
+              buttons: false
+            });
+          } else {
+            swal({
+              title: "Error!",
+              text: "There is already a node with the same id",
+              icon: "error",
+              timer: 2000,
+              buttons: false
+            });
           }
-        }
-        else if (mode === "link") {
-          if (isAvailableId(selection, document.getElementById("node_id").value, "link")) {
+        } else if (mode === "link") {
+          if (isAvailableId(selection, document.getElementById("node_id").value, "link") && 
+              isAvailableLabel(selection, document.getElementById("node_label").value)) {
+      
+            const labelParts = document.getElementById("node_label").value.split('->');
+            const source = labelParts[0];
+            const target = labelParts[1];
+
+            let modified_edge = {
+              id: document.getElementById("node_id").value,
+              source: source,
+              target: target,
+              label: document.getElementById("node_label").value
+            };
             graph.remove(selection);
-            graph.add_modified_link(selection.source, selection.target, document.getElementById("node_id").value, document.getElementById("node_label").value);
+            graph.edges.push(modified_edge);      
+            graph.add_link(source, target);
+            graph.objectify();
+            
+             swal({
+              title: "Done!",
+              text: "The link has been modified",
+              icon: "success",
+              timer: 2000,
+              buttons: false
+            }); 
+          } else if (isAvailableId(selection, document.getElementById("node_id").value, "link") === false ) {
+              swal({
+                title: "Error!",
+                text: "There is already a link with the same id",
+                icon: "error",
+                timer: 2000,
+                buttons: false
+              });
           }
-        global.selection = null;
-        update();
         }
+        update();
       }
+      
   
       function showEdit(selection_to_show) {
         if (isEditable(selection_to_show) === "node") {
@@ -346,12 +555,10 @@
         if (global.selection !== null)
             showEdit(global.selection);
         else {
-            document.getElementById("node_id").value = "";
-            document.getElementById("node_label").value = "";
-            document.getElementById("node_type").value = "";
+            resetEditor();
         }
       });
-  
+      global.selection = null;
       update();
   
       /* TOOLBAR */
@@ -413,12 +620,15 @@
             .attr("href", "img/trash.jpg")
             .on("click", function () {
                 graph.remove(global.selection);
+                resetEditor();
                 global.selection = null;
                 return update();
             });
   
         d3.select('#submit_node_changes').on("click", function () {
            submit_changes(global.selection);
+           unselect_all();
+           resetEditor();
         });
   
       library = $("<div class='library'></div></div>");
