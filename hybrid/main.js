@@ -131,30 +131,7 @@ var graph = {
     };
     graph.edges.push(newEdge);
     return newEdge;
-  }),
-
-  add_modified_link: function(source, target, mod_id, mod_lab) {
-    // avoid edges to self
-    if (source === target) return null;
-
-    var newEdge, i, edges, edge;
-    edges = graph.edges;
-
-    // avoid link duplicates
-    for (i = 0; i < edges.length; i++) {
-      edge = edges[i];
-      if (edge.source === source && edge.target === target) return null;
-    }
-
-    newEdge = {
-      id: mod_id,
-      label: mod_lab,
-      source: source,
-      target: target
-    };
-    graph.edges.push(newEdge);
-    return newEdge;
-  }
+  })
 };
 
 function main() {
@@ -478,18 +455,18 @@ function submit_changes(selection) {
           <input type="text" id="node_label" size="4" value="${selection.label}" />
           <label for="node_color">COLOR:</label>
           <select id="node_color">
-              <option value="gold" ${selection.type === "red" ? "selected" : ""}>Red</option>
-              <option value="orangered" ${selection.type === "blue" ? "selected" : ""}>Blue</option>
-              <option value="deeppink" ${selection.type === "green" ? "selected" : ""}>Green</option>
-              <option value="blueviolet" ${selection.type === "violet" ? "selected" : ""}>Violet</option>
-              <option value="dodgerblue" ${selection.type === "orange" ? "selected" : ""}>Orange</option>
+              <option value="red" ${selection.type === "red" ? "selected" : ""}>Red</option>
+              <option value="blue" ${selection.type === "blue" ? "selected" : ""}>Blue</option>
+              <option value="green" ${selection.type === "green" ? "selected" : ""}>Green</option>
+              <option value="violet" ${selection.type === "violet" ? "selected" : ""}>Violet</option>
+              <option value="orange" ${selection.type === "orange" ? "selected" : ""}>Orange</option>
           </select>
           <button id="edit-save">Save</button>
       </div>
     `);
     $("#edit-save").on("click", () => {
       selection.label = document.getElementById("node_label").value;
-      selection.type = document.getElementById("node_type").value;
+      selection.type = document.getElementById("node_color").value;
       update();
       return true;
     });
