@@ -81,31 +81,16 @@
       links_index:6,
   
       objectify: (function() {
-        // resolve node IDs (not optimized at all!)
-        var currentEdge, currentNode, i, edges, edgeResults;
-        edges = graph.edges;
-        edgeResults = [];
-        for (i = 0; i < edges.length; i++) {
-          currentEdge = edges[i];
-          edgeResults.push((function() {
-            var j, nodes, nodesResults;
-            nodes = graph.nodes;
-            nodesResults = [];
-            for (j = 0; j < nodes.length; j++) {
-              currentNode = nodes[j];
-              if (currentEdge.source === currentNode.id) {
-                currentEdge.source = currentNode;
-              }
-              else if (currentEdge.target === currentNode.id) {
-                currentEdge.target = currentNode;
-              } else {
-                nodesResults.push(void 0);
-              }
-            }
-            return nodesResults;
-          })());
+        const idToNodeMap = new Map();
+        var nodes = graph.nodes;
+        var edges = graph.edges;
+        for (let i = 0; i < nodes.length; i++) {
+          idToNodeMap.set(nodes[i].id, nodes[i]);
         }
-        return edgeResults;
+        for (let i = 0; i < edges.length; i++) {
+          edges[i].source = idToNodeMap.get(edges[i].source);
+          edges[i].target = idToNodeMap.get(edges[i].target);
+        }
       }),
   
       remove: (function(condemned) {

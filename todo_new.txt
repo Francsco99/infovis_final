@@ -1,0 +1,14 @@
+aggiungere zoom rotella
+aggiungere library
+aggiungere il pan
+id non modificabili
+implementare import e export
+modifiche statistiche dinamiche (senza necessità di fare submit)
+tasto clear
+snellire add modified link (trovare come rimuoverla)
+aggiugere gli alert
+aggiungere slider forza
+rendere le etichette non selezionabili
+funzione mostra statistiche
+spostare nel css gli stili dei nodi, etichette, archi
+cambiare i nomi degli input e output delle statistiche
