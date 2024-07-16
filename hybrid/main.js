@@ -1,17 +1,16 @@
-// Area di disegno
 const canvas = document.getElementById('graph-canvas');
 const width = canvas.clientWidth;
 const height = canvas.clientHeight;
 
-// Tool della toolbar in alto
-const saveSVG = document.getElementById('svg-download');
-const saveJSON = document.getElementById('json-download');
-const uploadJSON = document.getElementById('json-upload');
+// Seleziona gli input slider
+const chargeSlider = document.getElementById('charge');
+const linkSlider = document.getElementById('link');
+const attractSlider = document.getElementById('attract');
 
-const zoomIn = document.getElementById('zoom-in');
-const zoomOut = document.getElementById('zoom-out');
-
-//const colors = ['red', 'blue', 'green', 'yellow', 'purple']
+// Aggiungi event listener agli slider per aggiornare la simulazione quando i valori cambiano
+chargeSlider.addEventListener('input', updateForces);
+linkSlider.addEventListener('input', updateForces);
+attractSlider.addEventListener('input', updateForces);
 
 var global = {
   selection: null,
@@ -21,34 +20,34 @@ var global = {
 // Definizione del grafo
 var graph = {
   nodes: [],
-  edges: [],
+  links: [],
 
   objectify: function() {
     const idToNodeMap = new Map();
     var nodes = graph.nodes;
-    var edges = graph.edges;
+    var links = graph.links;
     for (let i = 0; i < nodes.length; i++) {
       idToNodeMap.set(nodes[i].id, nodes[i]);
     }
-    for (let i = 0; i < edges.length; i++) {
-      edges[i].source = idToNodeMap.get(edges[i].source);
-      edges[i].target = idToNodeMap.get(edges[i].target);
+    for (let i = 0; i < links.length; i++) {
+      links[i].source = idToNodeMap.get(links[i].source);
+      links[i].target = idToNodeMap.get(links[i].target);
     }
   },
 
   remove: function(condemned) {
-    // remove the given node or link from the graph, also deleting dangling edges if a node is removed
+    // remove the given node or link from the graph, also deleting dangling links if a node is removed
     if (graph.nodes.indexOf(condemned) >= 0) {
       graph.nodes = graph.nodes.filter(function(n) {
         return n !== condemned;
       });
-      graph.edges = graph.edges.filter(function(l) {
+      graph.links = graph.links.filter(function(l) {
         return l.source.id !== condemned.id && l.target.id !== condemned.id;
       });
     }
     // this part is for deleting the single link
-    else if (graph.edges.indexOf(condemned) >= 0) {
-      graph.edges = graph.edges.filter(function(l) {
+    else if (graph.links.indexOf(condemned) >= 0) {
+      graph.links = graph.links.filter(function(l) {
         return l !== condemned;
       });
     }
@@ -88,17 +87,17 @@ var graph = {
 
   add_link: (function(source, target) {
     console.log(source, target)
-    // avoid edges to self
+    // avoid links to self
     if (source === target) return null;
 
-    var newEdge, i, edges, edge;
-    edges = graph.edges;
+    var newLink, i, links, link;
+    links = graph.links;
 
     // avoid link duplicates
-    for (i = 0; i < edges.length; i++) {
-      edge = edges[i];
-      console.log(edge.source + " " + edge.target);
-      if (edge.source === source && edge.target === target || edge.source === target && edge.target === source) {
+    for (i = 0; i < links.length; i++) {
+      link = links[i];
+      console.log(link.source + " " + link.target);
+      if (link.source === source && link.target === target || link.source === target && link.target === source) {
         console.log("errore");
         swal({
           title: "Error!",
@@ -110,8 +109,8 @@ var graph = {
         return null;
       }
     }
-    // Gather all existing edges IDs
-    var existingIds = edges.map(function(n) { return parseInt(n.id, 10); });
+    // Gather all existing links IDs
+    var existingIds = links.map(function(n) { return parseInt(n.id, 10); });
     existingIds.sort(function(a, b) { return a - b; });
     
     // Find the first missing ID in the sequence
@@ -123,16 +122,17 @@ var graph = {
       }
     }
 
-    newEdge = {
+    newLink = {
       id: newId,
       label: source.label + "-" + target.label,
       source: source,
       target: target
     };
-    graph.edges.push(newEdge);
-    return newEdge;
+    graph.links.push(newLink);
+    return newLink;
   })
 };
+
 
 function main() {
 
@@ -143,7 +143,7 @@ function main() {
     { id: '4', label:"D", x: 467, y: 314, type: 'green' }
   ];
 
-  graph.edges = [
+  graph.links = [
     { id:"1", source: '1', target: '2', label:"A-B" },
     { id:"2", source: '2', target: '3', label:"B-C" },
     { id:"3", source: '3', target: '1', label:"C-A" },
@@ -153,9 +153,10 @@ function main() {
 
   graph.objectify();
 
-  var svg = d3.select('#graph-canvas');
+  //populateGraph(100, 200);
 
-  // ZOOM and PAN
+  var svg = d3.select('#graph-canvas').attr("fill","white");
+
   container = svg.append('g');    
 
   global.vis = container.append('g');
@@ -164,14 +165,20 @@ function main() {
     global.vis.attr('transform', event.transform);
   });
 
-  zoomIn.addEventListener('click', () => {
-    container.transition().call(zoom.scaleBy, 1.2);
+  var zoom = d3.zoom()
+  .scaleExtent([0.5, 8])
+  .on('zoom', (event) => {
+    global.vis.attr('transform', event.transform);
   });
-  
-  zoomOut.addEventListener('click', () => {
-    container.transition().call(zoom.scaleBy, 0.8);
-  });
-  // create a rectangular overlay to catch events
+
+// Apply zoom behavior to the container
+svg.call(zoom);
+
+// Add event listener for mouse wheel zooming
+svg.on('wheel', (event) => {
+  event.preventDefault();
+  zoom.scaleBy(svg.transition().duration(50), Math.pow(2, event.deltaY * -0.002));
+});
 
   // WARNING rect size is huge but not infinite. this is a dirty hack
   global.vis.append('rect')
@@ -191,9 +198,9 @@ function main() {
   
   // Inizializzazione layout force directed
   global.simulation = d3.forceSimulation(graph.nodes)
-    .force("charge", d3.forceManyBody().strength(-300))
-    .force("link", d3.forceLink(graph.edges).distance(100).id(d => d.id))
-    .force("attract", d3.forceRadial(0, width / 2, height / 2).strength(0.1)) // Forza che tende a tenere i nodi al centro
+    .force("charge", d3.forceManyBody().strength(+chargeSlider.value))
+    .force("link", d3.forceLink(graph.links).distance(+linkSlider.value).id(d => d.id))
+    .force("attract", d3.forceRadial(0, width / 2, height / 2).strength(+attractSlider.value)) // Forza che tende a tenere i nodi al centro
     .on("tick", () => {
       // Aggiornamento posizione nodi e archi
       global.vis.selectAll('.node')
@@ -224,6 +231,11 @@ function main() {
         if (!global.tempLine) {
           global.tempLine = global.vis.append('line')
             .attr('class', 'drag_link')
+            .attr('class', 'link')
+            .attr('stroke-width', '8px')
+            .attr('stroke', 'black')
+            .attr('opacity', '0.3')
+            .attr('stroke-linecap','round')
         }
         global.tempLine
           .attr('x1', d.x)
@@ -266,12 +278,15 @@ function update() {
   var links, nodes;
 
   // Selezione degli archi
-  links = global.vis.selectAll('.link').data(graph.edges, function(d) {
+  links = global.vis.selectAll('.link').data(graph.links, function(d) {
     return d.source.id + "-" + d.target.id;
   });
 
   links.enter().insert('line', '.node') // Inserisci i link prima dei nodi
     .attr('class', 'link')
+    .attr('stroke-width', '8px')
+    .attr('stroke', 'black')
+    .attr('opacity', '0.3')
     .on('click', function(event, d) {
       // selezione dell'arco
       global.selection = d;
@@ -307,15 +322,14 @@ function update() {
     });
 
   nodes_enter.append('circle')
-    .attr('r', 20)
-    .attr('fill', d => global.colorify(d.type))
-    .attr('cursor', 'pointer');
+    .attr('r', 25)
+    .attr('fill', d => global.colorify(d.type));
 
   nodes_enter.append('text')
     .attr('text-anchor', 'middle')
     .attr('user-select', 'none')
     .attr('dy', '.35em')
-    .attr('cursor', 'pointer')
+    .attr('font-size',"20px")
     .text(d => d.label);
 
   nodes.exit().remove();
@@ -329,7 +343,7 @@ function update() {
   nodes = global.vis.selectAll('.node').attr('transform', d => `translate(${d.x},${d.y})`);
 
   // Restart the force simulation.
-  global.simulation.force("link").links(graph.edges);
+  global.simulation.force("link").links(graph.links);
   global.simulation.nodes(graph.nodes);
   global.simulation.alpha(1).restart();
 };
@@ -357,36 +371,51 @@ d3.select("#pointer")
     .on("click", function () {
       global.tool = "pointer";
       d3.select("#pointer").classed('active', true);
+      d3.select("#add-node").classed('active', false);
       d3.select("#add-link").classed('active', false);
+      hideLibrary();
     });
 
 // Gestione strumenti della toolbar
 d3.select("#add-node")
   .on("click", function () {
-    $(".toolbar-extra").html(`
-      <div class="color-picker">
-          <div class="color-option" data-color="red" style="background-color:`+global.colorify("red")+` ;"></div>
-          <div class="color-option" data-color="blue" style="background-color: `+global.colorify("blue")+`;"></div>
-          <div class="color-option" data-color="green" style="background-color: `+global.colorify("green")+`;"></div>
-          <div class="color-option" data-color="violet" style="background-color: `+global.colorify("violet")+`;"></div>
-          <div class="color-option" data-color="orange" style="background-color: `+global.colorify("orange")+`;"></div>
-      </div>
-        `);
-    //const color = "blue";
-    $(".color-option").on("click", function() {
-      const color = $(this).data("color");
-      if (color) {
-        graph.add_node(color);
-        update();
-      }
-      });
+    global.tool = "add-node";
+    d3.select("#pointer").classed('active', false);
+    d3.select("#add-node").classed('active', true);
+    d3.select("#add-link").classed('active', false);
+
+    showLibrary();
   });
+
+function showLibrary() {
+  $("#toolbar-extra").html(`
+    <div id="color-picker">
+        <div class="color-option" data-color="red" style="background-color: ` + global.colorify("red") + ` ;"></div>
+        <div class="color-option" data-color="blue" style="background-color: ` + global.colorify("blue") + ` ;"></div>
+        <div class="color-option" data-color="green" style="background-color: ` + global.colorify("green") + ` ;"></div>
+        <div class="color-option" data-color="violet" style="background-color: ` + global.colorify("violet") + ` ;"></div>
+        <div class="color-option" data-color="orange" style="background-color: ` + global.colorify("orange") + ` ;"></div>
+    </div>`);
+  $(".color-option").on("click", function() {
+    const color = $(this).data("color");
+    if (color) {
+      graph.add_node(color);
+      update();
+    }
+    });
+}
+
+function hideLibrary() {
+  $("#toolbar-extra").html(``);
+}
 
 d3.select("#add-link")
   .on("click", function () {
     global.tool = "add-link";
-    d3.select("#add-link").classed('active', true);
     d3.select("#pointer").classed('active', false);
+    d3.select("#add-node").classed('active', false);
+    d3.select("#add-link").classed('active', true);
+    hideLibrary();
   });
 
 d3.select("#edit")
@@ -407,6 +436,36 @@ d3.select("#delete")
       update();
     }
   });
+
+d3.select("#delete-graph")
+  .on("click", function() {
+    // Mostra l'alert di conferma
+    swal({
+      title: "Are you sure to remove the graph?",
+      text: "Once deleted, you will not be able to recover this graph!",
+      icon: "warning",
+      buttons: true,
+      dangerMode: true,
+    })
+    .then((willDelete) => {
+      if (willDelete) {
+        swal("Your graph has been deleted!", {
+          icon: "success",
+          timer: 2000,
+          buttons: false
+        });
+        graph.nodes = [];
+        graph.links = [];
+        update();
+      } else {
+        swal("The graph is unchanged!", {
+          timer: 2000,
+          buttons: false
+        });
+        return
+        }
+    });
+  });  
 
 function selectionType(selection){
   if (selection !== null) {
@@ -435,8 +494,8 @@ function isAvailableId(selection, new_id, mode) {
     if (selection.id === new_id)
       return true;
     else {
-      for (let i = 0; i < graph.edges.length; i++) {
-        if (graph.edges[i].id === new_id)
+      for (let i = 0; i < graph.links.length; i++) {
+        if (graph.links[i].id === new_id)
           return false;
       }
       return true;
@@ -450,7 +509,7 @@ function submit_changes(selection) {
     $(".toolbar-left").html(`
       <div class="edit-form">
           <label for="node_id">ID:</label>
-          <span id="node_id">${selection.id} </span>
+          <span id="node_id">${selection.id}</span>
           <label for="node_label">LABEL:</label>
           <input type="text" id="node_label" size="4" value="${selection.label}" />
           <label for="node_color">COLOR:</label>
@@ -461,38 +520,37 @@ function submit_changes(selection) {
               <option value="violet" ${selection.type === "violet" ? "selected" : ""}>Violet</option>
               <option value="orange" ${selection.type === "orange" ? "selected" : ""}>Orange</option>
           </select>
-          <button id="edit-save">Save</button>
       </div>
     `);
-    $("#edit-save").on("click", () => {
+    
+    $("#node_label").on("input", () => {
       selection.label = document.getElementById("node_label").value;
+      update();
+    });
+    
+    $("#node_color").on("change", () => {
       selection.type = document.getElementById("node_color").value;
       update();
-      return true;
     });
 
   } else if (mode === "link") {
     $(".toolbar-left").html(`
       <div class="edit-form">
           <label for="node_id">ID:</label>
-          <span id="node_id">${selection.id} </span>
+          <span id="node_id">${selection.id}</span>
           <label for="node_label">LABEL:</label>
           <input type="text" id="node_label" size="4" value="${selection.label}" />
-          <button id="edit-save">Save</button>
       </div>
-  `);
-    $("#edit-save").on("click", () => {
+    `);
+    
+    $("#node_label").on("input", () => {
       selection.label = document.getElementById("node_label").value;
       update();
-      return true;
     });
-
-    } else {
-      alert("Errore, l'id selezionato è già in uso");
-      return false;
-    }
-    return false;
   }
+  
+  return false;
+}
 
 function visualizeStatistics(id,label,color){
   document.querySelector('.toolbar-left').innerHTML = `
@@ -501,3 +559,68 @@ function visualizeStatistics(id,label,color){
             <span>COLOR: ${color}</span>
   `;
 }
+
+d3.select("#svg-download")
+  .on("click", function () {
+    const serializer = new XMLSerializer();
+    const svgString = serializer.serializeToString(document.querySelector('svg'));
+    const blob = new Blob([svgString], { type: "image/svg+xml;charset=utf-8" });
+    saveAs(blob, "graph.svg");
+  });
+
+d3.select("#json-download")
+  .on("click", function () {
+    const json = JSON.stringify({ nodes: graph.nodes, links: graph.links });
+    const blob = new Blob([json], { type: "application/json" });
+    saveAs(blob, "graph.json");
+  });
+
+  function updateForces() {
+    const chargeValue = +chargeSlider.value;
+    const linkDistance = +linkSlider.value;
+    const attractStrength = +attractSlider.value;
+
+    global.simulation
+        .force("charge", d3.forceManyBody().strength(chargeValue))
+        .force("link", d3.forceLink(graph.links).distance(linkDistance).id(d => d.id))
+        .force("attract", d3.forceRadial(0, width / 2, height / 2).strength(attractStrength))
+        .alpha(1)
+        .restart();
+  }
+
+function populateGraph(numNodes, numLinks){
+  // Creazione dei nodi
+  for (let i = 1; i <= numNodes; i++) {
+    graph.add_node(['red', 'blue', 'green', 'violet', 'orange'][Math.floor(Math.random() * 5)] ); // Assegna un colore casuale
+}
+  
+  // Creazione degli archi
+  let edgeCount = 0;
+  while (edgeCount < numLinks) {
+    const sourceIndex = Math.floor(Math.random() * graph.nodes.length);
+    const targetIndex = Math.floor(Math.random() * graph.nodes.length);
+    const source = graph.nodes[sourceIndex];
+    const target = graph.nodes[targetIndex];
+
+    console.log(source + " " + target);
+
+    var valid = true;
+    // Evita autocollegamenti e duplicati
+    if (sourceIndex !== targetIndex) {
+      for (i = 0; i < graph.links.length; i++) {
+        link = graph.links[i];
+        if (link.source === source && link.target === target || link.source === target && link.target === source) {
+          valid = false;
+          break;
+        }
+      }
+      if (valid) {
+        graph.add_link(source, target);
+        edgeCount++;
+      }
+    }
+  }
+  return 
+}
+
+main();

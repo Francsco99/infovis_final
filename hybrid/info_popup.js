@@ -1,4 +1,3 @@
-// script.js
 document.addEventListener("DOMContentLoaded", function() {
     var popup = document.getElementById("popup");
     var closePopup = document.getElementById('close-popup');
