@@ -29,7 +29,7 @@ header h1{
 }
 
 .toolbar-left span {
-    margin-right: 15px;
+    margin-right: 5px;
     font-weight: bold;
 }
 
@@ -60,6 +60,10 @@ header h1{
 
 .toolbar-icon.active {
     color: red;
+}
+
+.toolbar-icon.unactive {
+    color: grey;
 }
 
 .canvas-container {
@@ -200,3 +204,23 @@ header h1{
     stroke-width: 4px;
     stroke: black;
 }
+
+#node_id {
+    margin: 5px;
+    width: 30px;
+    text-align: center;
+}
+
+#node_label {
+    margin: 5px;
+    width: 50px;
+    text-align: center;
+}
+
+#node_type {
+    margin: 5px;
+    width: 80px;
+    text-align: center;
+}
+
+

@@ -378,8 +378,7 @@
   
         nodes_enter.append('circle')
           .attr('r', 20)
-          .attr('stroke', function(d) {return global.colorify(d.type);})
-          .attr('fill', d => d3.hcl(global.colorify(d.type)).brighter(3));
+          .attr('fill', d.type);
   
         nodes_enter.append('text')
           .attr('text-anchor', 'middle')

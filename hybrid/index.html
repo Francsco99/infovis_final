@@ -13,6 +13,7 @@
     <script src="https://d3js.org/d3.v7.min.js"></script>
     <!--jquery library-->
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script src="https://unpkg.com/sweetalert/dist/sweetalert.min.js"></script>
 </head>
 <body onload="main()">
     <header>
@@ -20,16 +21,23 @@
     </header>
     <div class="toolbar">
         <div class="toolbar-left">
-            <span>ID: </span><span id="node_id"></span>
-            <span>LABEL: </span><span id="node_label"></span>
-            <span>COLOR: </span><span id="node_type"></span>
+            <span>ID: </span><input id="node_id"></input>
+            <span>LABEL: </span><input id="node_label"></input>
+            <span>COLOR: </span>
+            <select id="node_type" class="editInput">
+                <option style="display:none"></option>
+                <option value="blue">Blue</option>
+                <option value="orange">Orange</option>
+                <option value="green">Green</option>
+                <option value="red">Red</option>
+            </select>
         </div>
         <div class="toolbar-center">
             <i id="pointer" class="icon toolbar-icon active fa-solid fa-arrow-pointer fa-2xl" data-tool="pointer"></i>
-            <i id="add-node" class="icon toolbar-icon fa-solid fa-circle-plus fa-2xl" data-tool="select"></i>
-            <i id="add-link" class="icon toolbar-icon fa-solid fa-link fa-2xl" data-tool="select"></i>
-            <i id="edit" class="icon toolbar-icon fa-solid fa-pen-to-square fa-2xl" data-tool="select"></i>
-            <i id="delete" class="icon toolbar-icon fa-solid fa-eraser fa-2xl" data-tool="select"></i>
+            <i id="add-node" class="icon toolbar-icon fa-solid fa-circle-plus fa-2xl" data-tool="add-node"></i>
+            <i id="add-link" class="icon toolbar-icon fa-solid fa-link fa-2xl" data-tool="add-link"></i>
+            <i id="edit" class="icon unactive toolbar-icon fa-solid fa-pen-to-square fa-2xl" data-tool="edit"></i>
+            <i id="delete" class="icon unactive toolbar-icon fa-solid fa-eraser fa-2xl" data-tool="delete"></i>
             <i id="help-icon" class="icon fa-solid fa-circle-question fa-2xl"></i>
         </div>
 
