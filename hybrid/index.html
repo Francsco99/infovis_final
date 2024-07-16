@@ -5,6 +5,11 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>HYBRID Spring Embedder Graph Drawing Tool</title>
     <link rel="stylesheet" href="style.css">
+    <!--Favicon-->
+    <link rel="apple-touch-icon" sizes="180x180" href="../favicon/apple-touch-icon.png">
+    <link rel="icon" type="image/png" sizes="32x32" href="../favicon/favicon-32x32.png">
+    <link rel="icon" type="image/png" sizes="16x16" href="../favicon/favicon-16x16.png">
+    <link rel="manifest" href="../favicon/site.webmanifest">
     <!--Icons-->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css" integrity="sha512-SnH5WK+bZxgPHs44uWIX+LLJAJ9/2PkPKZ5QiAj6Ta86w+fsb2TkcmfRyVX3pBnMFcV7oQPJkl9QevSCWr3W6A==" crossorigin="anonymous" referrerpolicy="no-referrer" />
     <!--Font-->
@@ -16,21 +21,11 @@
     <script src="https://unpkg.com/sweetalert/dist/sweetalert.min.js"></script>
 </head>
 <body onload="main()">
-    <header>
-        <h1>Spring Embedder Graph Drawing Tool</h1>
-    </header>
     <div class="toolbar">
         <div class="toolbar-left">
-            <span>ID: </span><input id="node_id"></input>
-            <span>LABEL: </span><input id="node_label"></input>
+            <span>ID: </span>
+            <span>LABEL: </span>
             <span>COLOR: </span>
-            <select id="node_type" class="editInput">
-                <option style="display:none"></option>
-                <option value="blue">Blue</option>
-                <option value="orange">Orange</option>
-                <option value="green">Green</option>
-                <option value="red">Red</option>
-            </select>
         </div>
         <div class="toolbar-center">
             <i id="pointer" class="icon toolbar-icon active fa-solid fa-arrow-pointer fa-2xl" data-tool="pointer"></i>
@@ -42,11 +37,13 @@
         </div>
 
         <div class="toolbar-right">
+            <i class="icon fa-solid fa-trash fa-2xl"></i>
             <button id="svg-download" class="icon"><i class="fa-solid fa-camera fa-2xl"></i></button>
             <button id="json-download" class="icon"><i class="fa-solid fa-floppy-disk fa-2xl"></i></button>
             <button id="json-upload" class="icon"><i class="fa-solid fa-file-arrow-up fa-2xl"></i></button>
         </div>
     </div>
+    <div class="toolbar-extra"></div>
     <div class="canvas-container">
         <svg id="graph-canvas"></svg>
         

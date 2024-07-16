@@ -131,30 +131,7 @@ var graph = {
     };
     graph.edges.push(newEdge);
     return newEdge;
-  }),
-
-  add_modified_link: function(source, target, mod_id, mod_lab) {
-    // avoid edges to self
-    if (source === target) return null;
-
-    var newEdge, i, edges, edge;
-    edges = graph.edges;
-
-    // avoid link duplicates
-    for (i = 0; i < edges.length; i++) {
-      edge = edges[i];
-      if (edge.source === source && edge.target === target) return null;
-    }
-
-    newEdge = {
-      id: mod_id,
-      label: mod_lab,
-      source: source,
-      target: target
-    };
-    graph.edges.push(newEdge);
-    return newEdge;
-  }
+  })
 };
 
 function main() {
@@ -177,11 +154,6 @@ function main() {
   graph.objectify();
 
   var svg = d3.select('#graph-canvas');
-
-  // Initialize editor at first open
-  document.getElementById("node_id").value = "";
-  document.getElementById("node_label").value = "";
-  document.getElementById("node_type").value = "";
 
   // ZOOM and PAN
   container = svg.append('g');    
@@ -307,9 +279,7 @@ function update() {
       d3.selectAll('.node').classed('selected', false);
 
       // visualizzazione statistiche
-      document.getElementById("node_id").value = global.selection.id;
-      document.getElementById("node_label").value = global.selection.label;
-      document.getElementById("node_type").value = "";
+      visualizeStatistics(d.id,d.label,"");
     });
 
   links.exit().remove();
@@ -333,9 +303,7 @@ function update() {
       d3.selectAll('.link').classed('selected', false);
 
       // visualizzazione statistiche
-      document.getElementById("node_id").value = global.selection.id;
-      document.getElementById("node_label").value = global.selection.label;
-      document.getElementById("node_type").value = global.selection.type;
+      visualizeStatistics(d.id,d.label,d.type);
     });
 
   nodes_enter.append('circle')
@@ -381,9 +349,7 @@ d3.select(window).on('click', function () {
     d3.select("#edit").classed('unactive', true);
 
     // Svuota le statistiche
-    document.getElementById("node_id").value = "";
-    document.getElementById("node_label").value = "";
-    document.getElementById("node_type").value = "";
+    visualizeStatistics("","","");
   }
 });
 
@@ -397,11 +363,23 @@ d3.select("#pointer")
 // Gestione strumenti della toolbar
 d3.select("#add-node")
   .on("click", function () {
-    const color = "blue";
-    if (color) {
-      graph.add_node(color);
-      update();
-    }
+    $(".toolbar-extra").html(`
+      <div class="color-picker">
+          <div class="color-option" data-color="red" style="background-color:`+global.colorify("red")+` ;"></div>
+          <div class="color-option" data-color="blue" style="background-color: `+global.colorify("blue")+`;"></div>
+          <div class="color-option" data-color="green" style="background-color: `+global.colorify("green")+`;"></div>
+          <div class="color-option" data-color="violet" style="background-color: `+global.colorify("violet")+`;"></div>
+          <div class="color-option" data-color="orange" style="background-color: `+global.colorify("orange")+`;"></div>
+      </div>
+        `);
+    //const color = "blue";
+    $(".color-option").on("click", function() {
+      const color = $(this).data("color");
+      if (color) {
+        graph.add_node(color);
+        update();
+      }
+      });
   });
 
 d3.select("#add-link")
@@ -468,35 +446,58 @@ function isAvailableId(selection, new_id, mode) {
 
 function submit_changes(selection) {
   const mode = selectionType(selection);
-
   if (mode === "node") {
-    if (isAvailableId(selection, document.getElementById("node_id").value, mode)) {
-      //selection.id = document.getElementById("node_id").value;
+    $(".toolbar-left").html(`
+      <div class="edit-form">
+          <label for="node_id">ID:</label>
+          <span id="node_id">${selection.id} </span>
+          <label for="node_label">LABEL:</label>
+          <input type="text" id="node_label" size="4" value="${selection.label}" />
+          <label for="node_color">COLOR:</label>
+          <select id="node_color">
+              <option value="red" ${selection.type === "red" ? "selected" : ""}>Red</option>
+              <option value="blue" ${selection.type === "blue" ? "selected" : ""}>Blue</option>
+              <option value="green" ${selection.type === "green" ? "selected" : ""}>Green</option>
+              <option value="violet" ${selection.type === "violet" ? "selected" : ""}>Violet</option>
+              <option value="orange" ${selection.type === "orange" ? "selected" : ""}>Orange</option>
+          </select>
+          <button id="edit-save">Save</button>
+      </div>
+    `);
+    $("#edit-save").on("click", () => {
       selection.label = document.getElementById("node_label").value;
-      selection.type = document.getElementById("node_type").value;
+      selection.type = document.getElementById("node_color").value;
       update();
       return true;
-    } else {
-      alert("Errore, l'id selezionato è già in uso");
-      return false;
-    }
+    });
+
   } else if (mode === "link") {
-    if (isAvailableId(selection, document.getElementById("node_id").value, mode)) {
-
-      // Rimuovi l'arco
-      //graph.remove(selection);
-
-      // Aggiungi l'arco modificato
-      //graph.add_modified_link(sourceNode, targetNode, document.getElementById("node_id").value, document.getElementById("node_label").value);
-
+    $(".toolbar-left").html(`
+      <div class="edit-form">
+          <label for="node_id">ID:</label>
+          <span id="node_id">${selection.id} </span>
+          <label for="node_label">LABEL:</label>
+          <input type="text" id="node_label" size="4" value="${selection.label}" />
+          <button id="edit-save">Save</button>
+      </div>
+  `);
+    $("#edit-save").on("click", () => {
       selection.label = document.getElementById("node_label").value;
-
       update();
       return true;
+    });
+
     } else {
       alert("Errore, l'id selezionato è già in uso");
       return false;
     }
+    return false;
   }
-  return false;
+
+function visualizeStatistics(id,label,color){
+  document.querySelector('.toolbar-left').innerHTML = `
+            <span>ID: ${id}</span>
+            <span>LABEL: ${label}</span>
+            <span>COLOR: ${color}</span>
+  `;
 }

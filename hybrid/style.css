@@ -1,16 +1,9 @@
 body {
     margin: 0;
     font-family: 'Open Sans';
-}
-
-header {
-    text-align: center;
-    padding: 5px;
-    background-color: #f0f0f0;
-}
-
-header h1{
-    margin: 5px;
+    display: flex;
+    flex-direction: column;
+    height: 100vh;
 }
 
 .toolbar {
@@ -29,7 +22,7 @@ header h1{
 }
 
 .toolbar-left span {
-    margin-right: 5px;
+    margin-right: 15px;
     font-weight: bold;
 }
 
@@ -206,21 +199,36 @@ header h1{
 }
 
 #node_id {
-    margin: 5px;
+    margin-inline: 5px;
     width: 30px;
     text-align: center;
 }
 
 #node_label {
-    margin: 5px;
+    margin-inline: 5px;
     width: 50px;
     text-align: center;
 }
 
-#node_type {
-    margin: 5px;
+#node_color {
+    margin-inline: 5px;
     width: 80px;
     text-align: center;
 }
 
 
+
+.color-picker {
+    display: flex;
+    justify-content: center;
+    gap: 10px;
+    margin: 10px 0;
+}
+
+.color-option {
+    width: 30px;
+    height: 30px;
+    border-radius: 50%;
+    cursor: pointer;
+   
+}
