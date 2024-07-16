@@ -16,5 +16,3 @@ frasal
 fraspez
 -gestione icone download e upload
 -stile della pagina html
--aggiungere slider forza
--zoom con rotella

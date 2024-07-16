@@ -31,6 +31,10 @@ body {
     gap: 30px;
 }
 
+footer{
+    margin-bottom: 20px;
+}
+
 .toolbar-center {
     display: flex;
     justify-content: center;
@@ -74,15 +78,14 @@ body {
     transform-origin: center;
 }
 
-.zoom-controls {
+.help-control {
     position: absolute;
     bottom: 20px;
     right: 20px;
     display: flex;
-    flex-direction: column;
 }
 
-.zoom-controls i {
+.help-control i {
     margin: 10px;
     padding: 10px;
     background: none;
