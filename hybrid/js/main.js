@@ -43,18 +43,71 @@ var graph = {
   remove: function(condemned) {
     // remove the given node or link from the graph, also deleting dangling links if a node is removed
     if (graph.nodes.indexOf(condemned) >= 0) {
-      graph.nodes = graph.nodes.filter(function(n) {
-        return n !== condemned;
-      });
-      graph.links = graph.links.filter(function(l) {
-        return l.source.id !== condemned.id && l.target.id !== condemned.id;
-      });
+      if (condemned.type == "bend") {
+        var links = graph.links;
+        var ends = [];
+        var linksToReplace = [];
+        for (let i = 0; i < links.length; i++) {
+          if (links[i].source === condemned) {
+            ends.push(links[i].target);
+            linksToReplace.push(links[i]);
+          }
+          else if (links[i].target === condemned) {
+            ends.push(links[i].source);
+            linksToReplace.push(links[i]);
+          }
+        }
+        graph.links = graph.links.filter(function(l) {
+          return l !== linksToReplace[0] && l !== linksToReplace[1];
+        });
+
+        graph.add_link(ends[0], ends[1], true);
+
+        graph.nodes = graph.nodes.filter(function(n) {
+          return n !== condemned;
+        });
+      }
+      else {
+        graph.nodes = graph.nodes.filter(function(n) {
+          return n !== condemned;
+        });
+        var links = graph.links;
+        for (let i = 0; i < links.length; i++) {
+          if (links[i].source === condemned || links[i].target === condemned) {
+            graph.remove(links[i]);
+          }
+        }
+      }
     }
     // this part is for deleting the single link
     else if (graph.links.indexOf(condemned) >= 0) {
+      const source = condemned.source;
+      const target = condemned.target;
       graph.links = graph.links.filter(function(l) {
         return l !== condemned;
       });
+      if (source.type == "bend") {
+        var links = graph.links;
+        for (let i = 0; i < links.length; i++) {
+          if (links[i].source === source || links[i].target === source) {
+            graph.remove(links[i]);
+          }
+        }
+        graph.nodes = graph.nodes.filter(function(n) {
+          return n !== source;
+        });
+      }
+      if (target.type == "bend") {
+        var links = graph.links;
+        for (let i = 0; i < links.length; i++) {
+          if (links[i].source === target || links[i].target === target) {
+            graph.remove(links[i]);
+          }
+        }
+        graph.nodes = graph.nodes.filter(function(n) {
+          return n !== target;
+        });
+      }
     }
   },
 
@@ -76,10 +129,16 @@ var graph = {
         break;
       }
     }
+
+    var label = newId;
+
+    if (type == "bend") {
+      label = ""
+    }
   
     newNode = {
       id: newId,
-      label: newId,
+      label: label,
       x: width / 2,
       y: height / 2,
       type: type
@@ -90,8 +149,8 @@ var graph = {
     return newNode;
   }),
 
-  add_link: (function(source, target) {
-    //console.log(source, target)
+  add_link: (function(source, target, permitBends=false) {
+    if (!permitBends && (source.type == "bend" || target.type == "bend")) return null;
     // avoid links to self
     if (source === target) return null;
 
@@ -101,7 +160,6 @@ var graph = {
     // avoid link duplicates
     for (i = 0; i < links.length; i++) {
       link = links[i];
-      //console.log(link.source + " " + link.target);
       if (link.source === source && link.target === target || link.source === target && link.target === source) {
         console.log("errore");
         swal({
@@ -320,7 +378,10 @@ function update() {
   nodes = global.vis.selectAll('.node').data(graph.nodes, d => d.id);
 
   var nodes_enter = nodes.enter().append('g')
-    .attr('class', 'node')
+    .attr('class', function(d) {
+      if (d.type == "bend") return "node bend";
+      return "node";
+    })
     .call(global.drag)
     .on('click', function(event, d) {
       // selezione del nodo
@@ -329,27 +390,37 @@ function update() {
       d3.selectAll('.link').classed('selected', false);
 
       // visualizzazione statistiche
-      visualizeStatistics(d.id,d.label,d.type);
+      visualizeStatistics(d.id, d.label, d.type);
     });
 
   nodes_enter.append('circle')
-    .attr('r', 25)
-    .attr('fill', d => d.type);
+    .attr('r', function(d) {
+      if (d.type == "bend") return 10;
+      return 25})
+    .attr('fill', function(d) {
+      if (d.type == "bend") return "gray";
+      return global.colorify(d.type)})
 
   nodes_enter.append('text')
     .attr('text-anchor', 'middle')
     .attr('user-select', 'none')
     .attr('dy', '.35em')
     .attr('font-size',"20px")
-    .text(d => d.label);
+    .text( function(d) {
+      if (d.type == "bend") return "";
+      return d.label});
 
   nodes.exit().remove();
 
   // Aggiorna i nodi esistenti
   nodes.select('circle')
-    .attr('fill', d => (d.type))
+    .attr('fill', function(d) {
+      if (d.type == "bend") return "gray";
+        return global.colorify(d.type)})
   nodes.select('text')
-    .text(d => d.label);
+    .text(function(d) {
+      if (d.type == "bend") return "";
+      return d.label});
 
   nodes = global.vis.selectAll('.node').attr('transform', d => `translate(${d.x},${d.y})`);
 
@@ -360,6 +431,66 @@ function update() {
   
 };
 
+
+d3.select(window).on('click', function () {
+  if (global.selection !== null) {
+    d3.select("#delete").classed('active', true);
+    d3.select("#delete").classed('unactive', false);
+
+    if (selectionType(global.selection) == "node") {
+      if (global.selection.type != "bend") {
+        d3.select("#edit").classed('active', true);
+        d3.select("#edit").classed('unactive', false);
+      }
+      else {
+        d3.select("#edit").classed('active', false);
+        d3.select("#edit").classed('unactive', true);
+      }
+
+      d3.select("#add-bend").classed('active', false);
+      d3.select("#add-bend").classed('unactive', true);
+    }
+    else {
+      d3.select("#edit").classed('active', true);
+      d3.select("#edit").classed('unactive', false);
+    }
+    if (selectionType(global.selection) == "link") {
+      d3.select("#add-bend").classed('active', true);
+      d3.select("#add-bend").classed('unactive', false);
+    }
+  }
+  else {
+    d3.select("#delete").classed('active', false);
+    d3.select("#delete").classed('unactive', true);
+    d3.select("#edit").classed('active', false);
+    d3.select("#edit").classed('unactive', true);
+    d3.select("#add-bend").classed('unactive', true);
+    d3.select("#add-bend").classed('active', false);
+
+    // Svuota le statistiche
+    visualizeStatistics("","","");
+  }
+});
+
+d3.select("#pointer")
+    .on("click", function () {
+      global.tool = "pointer";
+      d3.select("#pointer").classed('active', true);
+      d3.select("#add-node").classed('active', false);
+      d3.select("#add-link").classed('active', false);
+      hideLibrary();
+    });
+
+// Gestione strumenti della toolbar
+d3.select("#add-node")
+  .on("click", function () {
+    global.tool = "add-node";
+    d3.select("#pointer").classed('active', false);
+    d3.select("#add-node").classed('active', true);
+    d3.select("#add-link").classed('active', false);
+
+    showLibrary();
+  
 // Funzione che mostra il selettore dei colori per i nodi
 function showLibrary() {
   // Costruzione del contenuto HTML per il color picker
@@ -387,6 +518,85 @@ function hideLibrary() {
   $("#toolbar-extra").html(``);
 }
 
+d3.select("#add-link")
+  .on("click", function () {
+    global.tool = "add-link";
+    d3.select("#pointer").classed('active', false);
+    d3.select("#add-node").classed('active', false);
+    d3.select("#add-link").classed('active', true);
+    hideLibrary();
+  });
+
+d3.select("#add-bend")
+.on("click", function () {
+  d3.selectAll('.link').classed('selected', false);
+  if (global.selection) {
+    if (selectionType(global.selection) == "link") {
+      const link = global.selection;
+      const targetNode = link.target;
+      const bendNode = graph.add_node("bend");
+      link.target = bendNode;
+      graph.add_link(bendNode, targetNode, true);
+      global.selection = null;
+      update();
+    }
+  }
+});
+
+d3.select("#edit")
+  .on("click", function () {
+    if (global.selection) {
+      if (selectionType(global.selection) == "node") {
+        if (global.selection.type == "bend") {
+          return;
+        }
+      }
+      const success = submitChanges(global.selection);
+      if (success) {
+        update();
+      }
+    }
+  });
+
+d3.select("#delete")
+  .on("click", function () {
+    if (global.selection) {
+      graph.remove(global.selection);
+      global.selection = null;
+      update();
+    }
+  });
+
+d3.select("#delete-graph")
+  .on("click", function() {
+    // Mostra l'alert di conferma
+    swal({
+      title: "Are you sure to remove the graph?",
+      text: "Once deleted, you will not be able to recover this graph!",
+      icon: "warning",
+      buttons: true,
+      dangerMode: true,
+    })
+    .then((willDelete) => {
+      if (willDelete) {
+        swal("Your graph has been deleted!", {
+          icon: "success",
+          timer: 2000,
+          buttons: false
+        });
+        graph.nodes = [];
+        graph.links = [];
+        update();
+      } else {
+        swal("The graph is unchanged!", {
+          timer: 2000,
+          buttons: false
+        });
+        return
+        }
+    });
+  });  
+
 // Funzione che restituisce il tipo di selezione corrente (nodo o link)
 function selectionType(selection){
   if (selection !== null) {
@@ -398,6 +608,7 @@ function selectionType(selection){
     }
   return null;
 }
+
 
 // Funzione per aggiornare un nodo o un arco
 function submitChanges(selection) {
@@ -469,6 +680,7 @@ function updateForces() {
         .alpha(1)
         .restart();
 }
+>>>>>>> main
 
 // Funzione per costruire un grafo random
 function populateGraph(numNodes, numLinks){
@@ -484,9 +696,7 @@ function populateGraph(numNodes, numLinks){
     const targetIndex = Math.floor(Math.random() * graph.nodes.length);
     const source = graph.nodes[sourceIndex];
     const target = graph.nodes[targetIndex];
-
-    //console.log(source + " " + target);
-
+    
     var valid = true;
     // Evita autocollegamenti e duplicati
     if (sourceIndex !== targetIndex) {
