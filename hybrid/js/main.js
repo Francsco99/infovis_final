@@ -560,20 +560,141 @@ function visualizeStatistics(id,label,color){
   `;
 }
 
+// Add event listener for SVG download
 d3.select("#svg-download")
   .on("click", function () {
     const serializer = new XMLSerializer();
     const svgString = serializer.serializeToString(document.querySelector('svg'));
     const blob = new Blob([svgString], { type: "image/svg+xml;charset=utf-8" });
     saveAs(blob, "graph.svg");
+    
+    // Display success notification after the user has decided where to save the file
+    setTimeout(function () {
+      swal({
+        title: "Success!",
+        text: "Graph screenshot saved successfully.",
+        icon: "success",
+        timer: 2000,
+        buttons: false
+      });
+    }, 500); // Delay to allow file save dialog to open
   });
 
+// Add event listener for JSON download
 d3.select("#json-download")
   .on("click", function () {
     const json = JSON.stringify({ nodes: graph.nodes, links: graph.links });
     const blob = new Blob([json], { type: "application/json" });
     saveAs(blob, "graph.json");
+    
+    // Display success notification after the user has decided where to save the file
+    setTimeout(function () {
+      swal({
+        title: "Success!",
+        text: "Graph JSON structure saved successfully.",
+        icon: "success",
+        timer: 2000,
+        buttons: false
+      });
+    }, 500); // Delay to allow file save dialog to open
   });
+
+
+d3.select("#json-upload")
+.on("click", function () {
+  document.getElementById('json-file-input').click();
+});
+
+d3.select("#json-file-input")
+  .on("change", function () {
+    const file = this.files[0];
+    if (file) {
+      // Check if the file type is JSON
+      if (file.type !== "application/json") {
+        swal({
+          title: "Error!",
+          text: "Please select a JSON file.",
+          icon: "error",
+          timer: 2000,
+          buttons: false
+        });
+
+        // Reset the input element
+        document.getElementById('json-file-input').value = "";
+        return;
+      }
+
+      swal({
+        title: "Are you sure you want to load a new graph?",
+        text: "This operation will overwrite the current graph.",
+        icon: "warning",
+        buttons: ["No", "Yes"],
+        dangerMode: true,
+      }).then((willLoad) => {
+        if (willLoad) {
+          const reader = new FileReader();
+          reader.onload = function (event) {
+            try {
+              const json = JSON.parse(event.target.result);
+              upload(json);
+              
+              // Display success notification
+              swal({
+                title: "Success!",
+                text: "Your graph has been loaded",
+                icon: "success",
+                timer: 2000,
+                buttons: false
+              });
+            } catch (error) {
+              // Display error notification
+              swal({
+                title: "Error!",
+                text: "The graph could not be loaded",
+                icon: "error",
+                timer: 2000,
+                buttons: false
+              });
+            }
+            
+            // Reset the input element
+            document.getElementById('json-file-input').value = "";
+          };
+          reader.readAsText(file);
+        } else {
+          // Reset the input element if the user cancels the operation
+          document.getElementById('json-file-input').value = "";
+        }
+      });
+    }
+  });
+
+
+  function upload(json) {
+    // Extract only the necessary attributes for nodes
+    graph.nodes = json.nodes.map(node => ({
+      id: node.id,
+      label: node.label,
+      x: node.x,
+      y: node.y,
+      type: node.type
+    }));
+  
+    // Extract only the necessary attributes for links
+    graph.links = json.links.map(link => ({
+      id: link.id,
+      label: link.label,
+      source: link.source.id,
+      target: link.target.id,
+      index: link.index
+    }));
+  
+    graph.objectify();
+    update();
+  }
+  
+
+
 
   function updateForces() {
     const chargeValue = +chargeSlider.value;
