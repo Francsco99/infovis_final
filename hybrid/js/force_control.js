@@ -2,6 +2,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const sliderIcon = document.getElementById('slider-icon');
     const forceControl = document.querySelector('.force-control');
     const closeSlider = document.getElementById('close-slider');
+    const canvas = document.getElementById('graph-canvas');
     
     const chargeSlider = document.getElementById('charge');
     const linkSlider = document.getElementById('link');
@@ -33,5 +34,12 @@ document.addEventListener('DOMContentLoaded', () => {
 
     attractSlider.addEventListener('input', () => {
         attractValue.textContent = attractSlider.value;
+    });
+
+    canvas.addEventListener('click', (event) => {
+        // Check if the click is outside the forceControl element
+        if (!forceControl.contains(event.target) && event.target !== sliderIcon) {
+            forceControl.style.display = 'none';
+        }
     });
 });
