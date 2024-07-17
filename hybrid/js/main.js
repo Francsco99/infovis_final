@@ -1,20 +1,25 @@
+// Canvas e dimensioni
 const canvas = document.getElementById('graph-canvas');
 const width = canvas.clientWidth;
 const height = canvas.clientHeight;
 
-// Seleziona gli input slider
+// Input range per i parametri della simulazione
 const chargeSlider = document.getElementById('charge');
 const linkSlider = document.getElementById('link');
 const attractSlider = document.getElementById('attract');
 
-// Aggiungi event listener agli slider per aggiornare la simulazione quando i valori cambiano
-chargeSlider.addEventListener('input', updateForces);
-linkSlider.addEventListener('input', updateForces);
-attractSlider.addEventListener('input', updateForces);
+// Interruttore on off per la simulazione
+const simulationOffIcon = document.getElementById("force-off");
+const simulationOnIcon = document.getElementById("force-on");
 
+// Colori dei nodi
+const colors = ['red', 'blue', 'green', 'purple', 'orange'];
+
+// Gestisce la selezione e il tool corrente
 var global = {
   selection: null,
-  tool: 'pointer'
+  tool: 'pointer',
+  simulationActive : false
 };
 
 // Definizione del grafo
@@ -86,7 +91,7 @@ var graph = {
   }),
 
   add_link: (function(source, target) {
-    console.log(source, target)
+    //console.log(source, target)
     // avoid links to self
     if (source === target) return null;
 
@@ -96,7 +101,7 @@ var graph = {
     // avoid link duplicates
     for (i = 0; i < links.length; i++) {
       link = links[i];
-      console.log(link.source + " " + link.target);
+      //console.log(link.source + " " + link.target);
       if (link.source === source && link.target === target || link.source === target && link.target === source) {
         console.log("errore");
         swal({
@@ -133,7 +138,6 @@ var graph = {
   })
 };
 
-
 function main() {
 /*
   graph.nodes = [
@@ -153,7 +157,12 @@ function main() {
 
   graph.objectify();*/
 
-  populateGraph(10, 20);
+  populateGraph(10, 10);
+
+  // Aggiungi event listener agli slider per aggiornare la simulazione quando i valori cambiano
+  chargeSlider.addEventListener('input', updateForces);
+  linkSlider.addEventListener('input', updateForces);
+  attractSlider.addEventListener('input', updateForces);
 
   var svg = d3.select('#graph-canvas').attr("fill","white");
 
@@ -193,14 +202,12 @@ svg.on('wheel', (event) => {
       d3.selectAll('.node').classed('selected', false);
       d3.selectAll('.link').classed('selected', false);
     });
-
-  global.colorify = d3.scaleOrdinal(d3.schemeCategory10);
   
   // Inizializzazione layout force directed
   global.simulation = d3.forceSimulation(graph.nodes)
-    .force("charge", d3.forceManyBody().strength(+chargeSlider.value))
-    .force("link", d3.forceLink(graph.links).distance(+linkSlider.value).id(d => d.id))
-    .force("attract", d3.forceRadial(0, width / 2, height / 2).strength(+attractSlider.value)) // Forza che tende a tenere i nodi al centro
+    .force("charge", d3.forceManyBody().strength(0))
+    //.force("link", d3.forceLink(graph.links).distance(+linkSlider.value).id(d => d.id))
+    .force("attract", d3.forceRadial(0, width / 2, height / 2).strength(0)) // Forza che tende a tenere i nodi al centro
     .on("tick", () => {
       // Aggiornamento posizione nodi e archi
       global.vis.selectAll('.node')
@@ -216,7 +223,8 @@ svg.on('wheel', (event) => {
     global.drag = d3.drag()
     .on('start', (event, d) => {
       if (global.tool !== "add-link") {
-        if (!event.active) global.simulation.alphaTarget(0.5).restart();
+        if (!event.active) 
+            global.simulation.alphaTarget(0.5).restart();
         d.fx = d.x;
         d.fy = d.y;
       }
@@ -246,7 +254,8 @@ svg.on('wheel', (event) => {
     })
     .on('end', (event, d) => {
       if (global.tool !== "add-link") {
-        if (!event.active) global.simulation.alphaTarget(0);
+        if (!event.active)
+            global.simulation.alphaTarget(0);
         d.fx = null;
         d.fy = null;
       } else {
@@ -272,8 +281,10 @@ svg.on('wheel', (event) => {
     });
 
   update();
+  global.simulation.tick();
 };
 
+// Funzione che aggiorna la visualizzazione del grafo
 function update() {
   var links, nodes;
 
@@ -323,7 +334,7 @@ function update() {
 
   nodes_enter.append('circle')
     .attr('r', 25)
-    .attr('fill', d => global.colorify(d.type));
+    .attr('fill', d => d.type);
 
   nodes_enter.append('text')
     .attr('text-anchor', 'middle')
@@ -336,17 +347,193 @@ function update() {
 
   // Aggiorna i nodi esistenti
   nodes.select('circle')
-    .attr('fill', d => global.colorify(d.type))
+    .attr('fill', d => (d.type))
   nodes.select('text')
     .text(d => d.label);
 
   nodes = global.vis.selectAll('.node').attr('transform', d => `translate(${d.x},${d.y})`);
 
   // Restart the force simulation.
-  global.simulation.force("link").links(graph.links);
+  //global.simulation.force("link").links(graph.links);
   global.simulation.nodes(graph.nodes);
   global.simulation.alpha(1).restart();
+  
 };
+
+// Funzione che mostra il selettore dei colori per i nodi
+function showLibrary() {
+  // Costruzione del contenuto HTML per il color picker
+  let colorPickerHtml = '<div id="color-picker">';
+  colors.forEach(color => {
+    colorPickerHtml += `<div class="color-option" data-color="${color}" style="background-color: ${color};"></div>`;
+  });
+  colorPickerHtml += '</div>';
+
+  // Inserimento del color picker nell'elemento con id "toolbar-extra"
+  $("#toolbar-extra").html(colorPickerHtml);
+
+  // Aggiungere il gestore di eventi per le opzioni di colore
+  $(".color-option").on("click", function() {
+    const color = $(this).data("color");
+    if (color) {
+      graph.add_node(color); // Supponendo che graph.add_node() sia una funzione definita altrove
+      update(); // Supponendo che update() sia una funzione definita altrove per aggiornare l'interfaccia utente
+    }
+  });
+}
+
+// Funzione che nasconde il selettore colori per i nodi
+function hideLibrary() {
+  $("#toolbar-extra").html(``);
+}
+
+// Funzione che restituisce il tipo di selezione corrente (nodo o link)
+function selectionType(selection){
+  if (selection !== null) {
+    if (graph.nodes.indexOf(selection) >= 0) {
+      return "node";
+    } else {
+      return "link";
+    }
+    }
+  return null;
+}
+
+// Funzione per aggiornare un nodo o un arco
+function submitChanges(selection) {
+  const mode = selectionType(selection);
+  if (mode === "node") {
+    $(".toolbar-left").html(`
+      <div class="edit-form">
+          <label for="node_id">ID:</label>
+          <span id="node_id">${selection.id}</span>
+          <label for="node_label">LABEL:</label>
+          <input type="text" id="node_label" size="4" value="${selection.label}" />
+          <label for="node_color">COLOR:</label>
+          <select id="node_color">
+              <option value="red" ${selection.type === "red" ? "selected" : ""}>Red</option>
+              <option value="blue" ${selection.type === "blue" ? "selected" : ""}>Blue</option>
+              <option value="green" ${selection.type === "green" ? "selected" : ""}>Green</option>
+              <option value="violet" ${selection.type === "violet" ? "selected" : ""}>Violet</option>
+              <option value="orange" ${selection.type === "orange" ? "selected" : ""}>Orange</option>
+          </select>
+      </div>
+    `);
+    
+    $("#node_label").on("input", () => {
+      selection.label = document.getElementById("node_label").value;
+      update();
+    });
+    
+    $("#node_color").on("change", () => {
+      selection.type = document.getElementById("node_color").value;
+      update();
+    });
+
+  } else if (mode === "link") {
+    $(".toolbar-left").html(`
+      <div class="edit-form">
+          <label for="node_id">ID:</label>
+          <span id="node_id">${selection.id}</span>
+          <label for="node_label">LABEL:</label>
+          <input type="text" id="node_label" size="4" value="${selection.label}" />
+      </div>
+    `);
+    
+    $("#node_label").on("input", () => {
+      selection.label = document.getElementById("node_label").value;
+      update();
+    });
+  }
+  return false;
+}
+
+// Funzione per visualizzare le statistiche in alto a sinistra
+function visualizeStatistics(id,label,color){
+  document.querySelector('.toolbar-left').innerHTML = `
+            <span>ID: ${id}</span>
+            <span>LABEL: ${label}</span>
+            <span>COLOR: ${color}</span>
+  `;
+}
+
+// Funzione per aggiornare la forza con i valori inseriti tramite gli slider
+function updateForces() {
+    const chargeValue = +chargeSlider.value;
+    const linkDistance = +linkSlider.value;
+    const attractStrength = +attractSlider.value;
+    global.simulation
+        .force("charge", d3.forceManyBody().strength(chargeValue))
+        //.force("link", d3.forceLink(graph.links).distance(linkDistance).id(d => d.id))
+        .force("attract", d3.forceRadial(0, width / 2, height / 2).strength(attractStrength))
+        .alpha(1)
+        .restart();
+}
+
+// Funzione per costruire un grafo random
+function populateGraph(numNodes, numLinks){
+  // Creazione dei nodi
+  for (let i = 1; i <= numNodes; i++) {
+    graph.add_node(colors[Math.floor(Math.random() * 5)] ); // Assegna un colore casuale
+}
+  
+  // Creazione degli archi
+  let edgeCount = 0;
+  while (edgeCount < numLinks) {
+    const sourceIndex = Math.floor(Math.random() * graph.nodes.length);
+    const targetIndex = Math.floor(Math.random() * graph.nodes.length);
+    const source = graph.nodes[sourceIndex];
+    const target = graph.nodes[targetIndex];
+
+    //console.log(source + " " + target);
+
+    var valid = true;
+    // Evita autocollegamenti e duplicati
+    if (sourceIndex !== targetIndex) {
+      for (i = 0; i < graph.links.length; i++) {
+        link = graph.links[i];
+        if (link.source === source && link.target === target || link.source === target && link.target === source) {
+          valid = false;
+          break;
+        }
+      }
+      if (valid) {
+        graph.add_link(source, target);
+        edgeCount++;
+      }
+    }
+  }
+  return 
+}
+
+// Funzione per gestire l'avvio e l'arresto della simulazione
+function toggleSimulation() {
+  if (!global.simulationActive) {
+    global.simulationActive = true;
+    
+    global.simulation
+      .force("charge", d3.forceManyBody().strength(-300))
+    //.force("link", d3.forceLink(graph.links).distance(+linkSlider.value).id(d => d.id))
+      .force("attract", d3.forceRadial(0, width / 2, height / 2).strength(0.1)); // Forza che tende a tenere i nodi al centro
+    
+      simulationOnIcon.style.display = 'block';
+    simulationOffIcon.style.display = 'none';
+  } else if(global.simulationActive){
+    global.simulationActive = false;
+    
+    global.simulation
+      .force("charge", d3.forceManyBody().strength(0))
+      //.force("link", d3.forceLink(graph.links).distance(+linkSlider.value).id(d => d.id))
+      .force("attract", d3.forceRadial(0, width / 2, height / 2).strength(0)); // Forza che tende a tenere i nodi al centro
+    
+      simulationOnIcon.style.display = 'none';
+    simulationOffIcon.style.display = 'block';
+  }
+}
+
+// Collegamento degli event listeners ai toggle
+simulationOnIcon.addEventListener('click', toggleSimulation);
+simulationOffIcon.addEventListener('click', toggleSimulation);
 
 
 d3.select(window).on('click', function () {
@@ -387,28 +574,6 @@ d3.select("#add-node")
     showLibrary();
   });
 
-function showLibrary() {
-  $("#toolbar-extra").html(`
-    <div id="color-picker">
-        <div class="color-option" data-color="red" style="background-color: ` + global.colorify("red") + ` ;"></div>
-        <div class="color-option" data-color="blue" style="background-color: ` + global.colorify("blue") + ` ;"></div>
-        <div class="color-option" data-color="green" style="background-color: ` + global.colorify("green") + ` ;"></div>
-        <div class="color-option" data-color="violet" style="background-color: ` + global.colorify("violet") + ` ;"></div>
-        <div class="color-option" data-color="orange" style="background-color: ` + global.colorify("orange") + ` ;"></div>
-    </div>`);
-  $(".color-option").on("click", function() {
-    const color = $(this).data("color");
-    if (color) {
-      graph.add_node(color);
-      update();
-    }
-    });
-}
-
-function hideLibrary() {
-  $("#toolbar-extra").html(``);
-}
-
 d3.select("#add-link")
   .on("click", function () {
     global.tool = "add-link";
@@ -421,7 +586,7 @@ d3.select("#add-link")
 d3.select("#edit")
   .on("click", function () {
     if (global.selection) {
-      const success = submit_changes(global.selection);
+      const success = submitChanges(global.selection);
       if (success) {
         update();
       }
@@ -467,99 +632,6 @@ d3.select("#delete-graph")
     });
   });  
 
-function selectionType(selection){
-  if (selection !== null) {
-    if (graph.nodes.indexOf(selection) >= 0) {
-      return "node";
-    } else {
-      return "link";
-    }
-    }
-  return null;
-}
-
-function isAvailableId(selection, new_id, mode) {
-  if (mode === "node") {
-      if (selection.id === new_id)
-          return true;
-      else {
-          for (let i = 0; i < graph.nodes.length; i++) {
-            if (graph.nodes[i].id === new_id)
-              return false;
-          }
-          return true;
-      }
-  }
-  else if (mode === "link") {
-    if (selection.id === new_id)
-      return true;
-    else {
-      for (let i = 0; i < graph.links.length; i++) {
-        if (graph.links[i].id === new_id)
-          return false;
-      }
-      return true;
-    }
-  }
-}
-
-function submit_changes(selection) {
-  const mode = selectionType(selection);
-  if (mode === "node") {
-    $(".toolbar-left").html(`
-      <div class="edit-form">
-          <label for="node_id">ID:</label>
-          <span id="node_id">${selection.id}</span>
-          <label for="node_label">LABEL:</label>
-          <input type="text" id="node_label" size="4" value="${selection.label}" />
-          <label for="node_color">COLOR:</label>
-          <select id="node_color">
-              <option value="red" ${selection.type === "red" ? "selected" : ""}>Red</option>
-              <option value="blue" ${selection.type === "blue" ? "selected" : ""}>Blue</option>
-              <option value="green" ${selection.type === "green" ? "selected" : ""}>Green</option>
-              <option value="violet" ${selection.type === "violet" ? "selected" : ""}>Violet</option>
-              <option value="orange" ${selection.type === "orange" ? "selected" : ""}>Orange</option>
-          </select>
-      </div>
-    `);
-    
-    $("#node_label").on("input", () => {
-      selection.label = document.getElementById("node_label").value;
-      update();
-    });
-    
-    $("#node_color").on("change", () => {
-      selection.type = document.getElementById("node_color").value;
-      update();
-    });
-
-  } else if (mode === "link") {
-    $(".toolbar-left").html(`
-      <div class="edit-form">
-          <label for="node_id">ID:</label>
-          <span id="node_id">${selection.id}</span>
-          <label for="node_label">LABEL:</label>
-          <input type="text" id="node_label" size="4" value="${selection.label}" />
-      </div>
-    `);
-    
-    $("#node_label").on("input", () => {
-      selection.label = document.getElementById("node_label").value;
-      update();
-    });
-  }
-  
-  return false;
-}
-
-function visualizeStatistics(id,label,color){
-  document.querySelector('.toolbar-left').innerHTML = `
-            <span>ID: ${id}</span>
-            <span>LABEL: ${label}</span>
-            <span>COLOR: ${color}</span>
-  `;
-}
-
 d3.select("#svg-download")
   .on("click", function () {
     const serializer = new XMLSerializer();
@@ -574,53 +646,5 @@ d3.select("#json-download")
     const blob = new Blob([json], { type: "application/json" });
     saveAs(blob, "graph.json");
   });
-
-  function updateForces() {
-    const chargeValue = +chargeSlider.value;
-    const linkDistance = +linkSlider.value;
-    const attractStrength = +attractSlider.value;
-
-    global.simulation
-        .force("charge", d3.forceManyBody().strength(chargeValue))
-        .force("link", d3.forceLink(graph.links).distance(linkDistance).id(d => d.id))
-        .force("attract", d3.forceRadial(0, width / 2, height / 2).strength(attractStrength))
-        .alpha(1)
-        .restart();
-  }
-
-function populateGraph(numNodes, numLinks){
-  // Creazione dei nodi
-  for (let i = 1; i <= numNodes; i++) {
-    graph.add_node(['red', 'blue', 'green', 'violet', 'orange'][Math.floor(Math.random() * 5)] ); // Assegna un colore casuale
-}
-  
-  // Creazione degli archi
-  let edgeCount = 0;
-  while (edgeCount < numLinks) {
-    const sourceIndex = Math.floor(Math.random() * graph.nodes.length);
-    const targetIndex = Math.floor(Math.random() * graph.nodes.length);
-    const source = graph.nodes[sourceIndex];
-    const target = graph.nodes[targetIndex];
-
-    console.log(source + " " + target);
-
-    var valid = true;
-    // Evita autocollegamenti e duplicati
-    if (sourceIndex !== targetIndex) {
-      for (i = 0; i < graph.links.length; i++) {
-        link = graph.links[i];
-        if (link.source === source && link.target === target || link.source === target && link.target === source) {
-          valid = false;
-          break;
-        }
-      }
-      if (valid) {
-        graph.add_link(source, target);
-        edgeCount++;
-      }
-    }
-  }
-  return 
-}
 
 main();
