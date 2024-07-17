@@ -153,7 +153,7 @@ function main() {
 
   graph.objectify();
 
-  //populateGraph(100, 200);
+  populateGraph(100, 200);
 
   var svg = d3.select('#graph-canvas').attr("fill","white");
 
