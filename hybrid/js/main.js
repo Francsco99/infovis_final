@@ -5,7 +5,7 @@ const height = canvas.clientHeight;
 
 // Input range per i parametri della simulazione
 const chargeSlider = document.getElementById('charge');
-const linkSlider = document.getElementById('link');
+//const linkSlider = document.getElementById('link');
 const attractSlider = document.getElementById('attract');
 
 // Interruttore on off per la simulazione
@@ -19,7 +19,7 @@ const colors = ['red', 'blue', 'green', 'purple', 'orange'];
 var global = {
   selection: null,
   tool: 'pointer',
-  simulationActive : false
+  simulationActive : true
 };
 
 // Definizione del grafo
@@ -161,7 +161,7 @@ function main() {
 
   // Aggiungi event listener agli slider per aggiornare la simulazione quando i valori cambiano
   chargeSlider.addEventListener('input', updateForces);
-  linkSlider.addEventListener('input', updateForces);
+  //linkSlider.addEventListener('input', updateForces);
   attractSlider.addEventListener('input', updateForces);
 
   var svg = d3.select('#graph-canvas').attr("fill","white");
@@ -205,9 +205,9 @@ svg.on('wheel', (event) => {
   
   // Inizializzazione layout force directed
   global.simulation = d3.forceSimulation(graph.nodes)
-    .force("charge", d3.forceManyBody().strength(0))
+    .force("charge", d3.forceManyBody().strength(-300))
     //.force("link", d3.forceLink(graph.links).distance(+linkSlider.value).id(d => d.id))
-    .force("attract", d3.forceRadial(0, width / 2, height / 2).strength(0)) // Forza che tende a tenere i nodi al centro
+    .force("attract", d3.forceRadial(0, width / 2, height / 2).strength(0.1)) // Forza che tende a tenere i nodi al centro
     .on("tick", () => {
       // Aggiornamento posizione nodi e archi
       global.vis.selectAll('.node')
@@ -460,7 +460,7 @@ function visualizeStatistics(id,label,color){
 // Funzione per aggiornare la forza con i valori inseriti tramite gli slider
 function updateForces() {
     const chargeValue = +chargeSlider.value;
-    const linkDistance = +linkSlider.value;
+    //const linkDistance = +linkSlider.value;
     const attractStrength = +attractSlider.value;
     global.simulation
         .force("charge", d3.forceManyBody().strength(chargeValue))
