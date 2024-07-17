@@ -44,10 +44,6 @@ document.addEventListener('DOMContentLoaded', () => {
         chargeValue.textContent = chargeSlider.value;
     });
 
-    linkSlider.addEventListener('input', () => {
-        linkValue.textContent = linkSlider.value;
-    });
-
     attractSlider.addEventListener('input', () => {
         attractValue.textContent = attractSlider.value;
     });
