@@ -135,7 +135,7 @@ var graph = {
 
 
 function main() {
-
+/*
   graph.nodes = [
     { id: '1', label:"A", type: 'blue' },
     { id: '2', label:"B", x: 793, y: 364, type: 'blue' },
@@ -151,9 +151,9 @@ function main() {
     { id:"5", source: '4', target: '2', label:"D-B" }
   ];
 
-  graph.objectify();
+  graph.objectify();*/
 
-  populateGraph(100, 200);
+  populateGraph(10, 20);
 
   var svg = d3.select('#graph-canvas').attr("fill","white");
 
