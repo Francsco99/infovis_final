@@ -96,7 +96,9 @@ var graph = {
     // avoid link duplicates
     for (i = 0; i < links.length; i++) {
       link = links[i];
+      console.log(link.source + " " + link.target);
       if (link.source === source && link.target === target || link.source === target && link.target === source) {
+        console.log("errore");
         swal({
           title: "Error!",
           text: "There is already a link",
@@ -133,7 +135,7 @@ var graph = {
 
 
 function main() {
-
+/*
   graph.nodes = [
     { id: '1', label:"A", type: 'blue' },
     { id: '2', label:"B", x: 793, y: 364, type: 'blue' },
@@ -149,12 +151,11 @@ function main() {
     { id:"5", source: '4', target: '2', label:"D-B" }
   ];
 
-  graph.objectify();
+  graph.objectify();*/
 
-  //populateGraph(100, 200);
+  populateGraph(10, 20);
 
   var svg = d3.select('#graph-canvas').attr("fill","white");
-
 
   container = svg.append('g');    
 
@@ -200,7 +201,6 @@ svg.on('wheel', (event) => {
     .force("charge", d3.forceManyBody().strength(+chargeSlider.value))
     .force("link", d3.forceLink(graph.links).distance(+linkSlider.value).id(d => d.id))
     .force("attract", d3.forceRadial(0, width / 2, height / 2).strength(+attractSlider.value)) // Forza che tende a tenere i nodi al centro
-
     .on("tick", () => {
       // Aggiornamento posizione nodi e archi
       global.vis.selectAll('.node')
@@ -560,7 +560,6 @@ function visualizeStatistics(id,label,color){
   `;
 }
 
-
 d3.select("#svg-download")
   .on("click", function () {
     const serializer = new XMLSerializer();
@@ -589,12 +588,11 @@ d3.select("#json-download")
         .restart();
   }
 
-
 function populateGraph(numNodes, numLinks){
   // Creazione dei nodi
   for (let i = 1; i <= numNodes; i++) {
     graph.add_node(['red', 'blue', 'green', 'violet', 'orange'][Math.floor(Math.random() * 5)] ); // Assegna un colore casuale
-  }
+}
   
   // Creazione degli archi
   let edgeCount = 0;
