@@ -12,6 +12,21 @@ document.addEventListener('DOMContentLoaded', () => {
     const linkValue = document.getElementById('link-value');
     const attractValue = document.getElementById('attract-value');
 
+    const simulationOffIcon = document.getElementById("force-off");
+    const simulationOnIcon = document.getElementById("force-on");
+
+    simulationOffIcon.addEventListener("click", () => {
+        simulationOffIcon.style.display = "none";
+        simulationOnIcon.style.display = "inline";
+        sliderIcon.style.display = "inline";
+    });
+
+    simulationOnIcon.addEventListener("click", () => {
+        simulationOnIcon.style.display = "none";
+        simulationOffIcon.style.display = "inline";
+        sliderIcon.style.display = "none";
+    });
+
     sliderIcon.addEventListener('click', () => {
         if (forceControl.style.display === 'none' || forceControl.style.display === '') {
             forceControl.style.display = 'flex';
@@ -19,6 +34,7 @@ document.addEventListener('DOMContentLoaded', () => {
             forceControl.style.display = 'none';
         }
     });
+
 
     closeSlider.addEventListener('click', () => {
         forceControl.style.display = 'none';

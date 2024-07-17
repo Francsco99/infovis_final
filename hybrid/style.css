@@ -6,6 +6,7 @@ body {
     height: 100vh;
 }
 
+/* Toolbar Styles */
 .toolbar {
     display: flex;
     justify-content: space-between;
@@ -63,6 +64,7 @@ body {
     color: #8D99AE;
 }
 
+/* Canvas Container Styles */
 .canvas-container {
     position: relative;
     width: 100%;
@@ -78,8 +80,10 @@ body {
     transform-origin: center;
 }
 
+/* Control Styles */
 .help-control,
-.slider-control {
+.slider-control,
+.force-toggle {
     position: absolute;
     bottom: 20px;
     display: flex;
@@ -89,12 +93,14 @@ body {
     right: 20px;
 }
 
-.slider-control {
+.slider-control,
+.force-toggle {
     left: 20px;
 }
 
 .help-control i,
-.slider-control i {
+.slider-control i,
+.force-toggle i {
     margin: 10px;
     padding: 10px;
     background: none;
@@ -105,6 +111,7 @@ body {
     justify-content: center;
 }
 
+/* Popup Styles */
 .popup {
     display: none;
     position: fixed;
@@ -153,6 +160,7 @@ body {
     cursor: pointer;
 }
 
+/* Color Picker Styles */
 #color-picker-toolbar {
     position: absolute;
     display: flex;
@@ -173,12 +181,13 @@ body {
     cursor: pointer;
 }
 
+/* Node and Link Styles */
 .node > circle {
     stroke-width: 4px;
     cursor: pointer;
 }
 
-.node > text{
+.node > text {
     cursor: pointer;
 }
 
@@ -201,6 +210,7 @@ body {
     stroke: black;
 }
 
+/* Node Info Styles */
 #node_id,
 #node_label,
 #node_color {
@@ -220,6 +230,7 @@ body {
     width: 80px;
 }
 
+/* Color Picker */
 #color-picker {
     display: flex;
     justify-content: center;
@@ -234,6 +245,7 @@ body {
     cursor: pointer;
 }
 
+/* Force Control Styles */
 .force-control {
     position: absolute;
     bottom: 20px;
@@ -261,4 +273,12 @@ body {
     align-self: flex-end;
     cursor: pointer;
     margin-bottom: 10px;
+}
+
+#force-off {
+    display: none;
+}
+
+#slider-icon {
+    display: none;
 }
