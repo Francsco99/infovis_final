@@ -11,6 +11,9 @@ const attractSlider = document.getElementById('attract');
 // Interruttore on off per la simulazione
 const simulationOffIcon = document.getElementById("force-off");
 const simulationOnIcon = document.getElementById("force-on");
+// Collegamento degli event listeners ai toggle
+simulationOnIcon.addEventListener('click', toggleSimulation);
+simulationOffIcon.addEventListener('click', toggleSimulation);
 
 // Colori dei nodi
 const colors = ['red', 'blue', 'green', 'purple', 'orange'];
@@ -197,6 +200,7 @@ var graph = {
   })
 };
 
+// Funzione principale
 function main() {
 /*
   graph.nodes = [
@@ -430,64 +434,6 @@ function update() {
   global.simulation.alpha(1).restart();
   
 };
-
-
-d3.select(window).on('click', function () {
-  if (global.selection !== null) {
-    d3.select("#delete").classed('active', true);
-    d3.select("#delete").classed('unactive', false);
-
-    if (selectionType(global.selection) == "node") {
-      if (global.selection.type != "bend") {
-        d3.select("#edit").classed('active', true);
-        d3.select("#edit").classed('unactive', false);
-      }
-      else {
-        d3.select("#edit").classed('active', false);
-        d3.select("#edit").classed('unactive', true);
-      }
-
-      d3.select("#add-bend").classed('active', false);
-      d3.select("#add-bend").classed('unactive', true);
-    }
-    else {
-      d3.select("#edit").classed('active', true);
-      d3.select("#edit").classed('unactive', false);
-      d3.select("#add-bend").classed('active', true);
-      d3.select("#add-bend").classed('unactive', false);
-    }
-  }
-  else {
-    d3.select("#delete").classed('active', false);
-    d3.select("#delete").classed('unactive', true);
-    d3.select("#edit").classed('active', false);
-    d3.select("#edit").classed('unactive', true);
-    d3.select("#add-bend").classed('unactive', true);
-    d3.select("#add-bend").classed('active', false);
-
-    // Svuota le statistiche
-    visualizeStatistics("","","");
-  }
-});
-
-d3.select("#pointer")
-    .on("click", function () {
-      global.tool = "pointer";
-      d3.select("#pointer").classed('active', true);
-      d3.select("#add-node").classed('active', false);
-      d3.select("#add-link").classed('active', false);
-      hideLibrary();
-    });
-
-// Gestione strumenti della toolbar
-d3.select("#add-node")
-  .on("click", function () {
-    global.tool = "add-node";
-    d3.select("#pointer").classed('active', false);
-    d3.select("#add-node").classed('active', true);
-    d3.select("#add-link").classed('active', false);
-
-    showLibrary()});
   
 // Funzione che mostra il selettore dei colori per i nodi
 function showLibrary() {
@@ -516,218 +462,29 @@ function hideLibrary() {
   $("#toolbar-extra").html(``);
 }
 
-d3.select("#add-link")
-  .on("click", function () {
-    global.tool = "add-link";
-    d3.select("#pointer").classed('active', false);
-    d3.select("#add-node").classed('active', false);
-    d3.select("#add-link").classed('active', true);
-    hideLibrary();
-  });
+// Funzione per caricare il file json del grafo
+function upload(json) {
+  // Extract only the necessary attributes for nodes
+  graph.nodes = json.nodes.map(node => ({
+    id: node.id,
+    label: node.label,
+    x: node.x,
+    y: node.y,
+    type: node.type
+  }));
 
-d3.select("#add-bend")
-.on("click", function () {
-  d3.selectAll('.link').classed('selected', false);
-  if (global.selection) {
-    if (selectionType(global.selection) == "link") {
-      const link = global.selection;
-      const sourceNode = link.source;
-      const targetNode = link.target;
-      const bendNode = graph.add_node("bend", (sourceNode.x + targetNode.x) / 2, (sourceNode.y + targetNode.y) / 2);
-      link.target = bendNode;
-      graph.add_link(bendNode, targetNode, true);
-      global.selection = null;
-      update();
-    }
-  }
-});
+  // Extract only the necessary attributes for links
+  graph.links = json.links.map(link => ({
+    id: link.id,
+    label: link.label,
+    source: link.source.id,
+    target: link.target.id,
+    index: link.index
+  }));
 
-d3.select("#edit")
-  .on("click", function () {
-    if (global.selection) {
-      if (selectionType(global.selection) == "node") {
-        if (global.selection.type == "bend") {
-          return;
-        }
-      }
-      const success = submitChanges(global.selection);
-      if (success) {
-        update();
-      }
-    }
-  });
-
-d3.select("#delete")
-  .on("click", function () {
-    if (global.selection) {
-      graph.remove(global.selection);
-      global.selection = null;
-      update();
-    }
-  });
-
-d3.select("#delete-graph")
-  .on("click", function() {
-    // Mostra l'alert di conferma
-    swal({
-      title: "Are you sure to remove the graph?",
-      text: "Once deleted, you will not be able to recover this graph!",
-      icon: "warning",
-      buttons: true,
-      dangerMode: true,
-    })
-    .then((willDelete) => {
-      if (willDelete) {
-        swal("Your graph has been deleted!", {
-          icon: "success",
-          timer: 2000,
-          buttons: false
-        });
-        graph.nodes = [];
-        graph.links = [];
-        update();
-      } else {
-        swal("The graph is unchanged!", {
-          timer: 2000,
-          buttons: false
-        });
-        return
-        }
-    });
-  });
-
-// Add event listener for SVG download
-d3.select("#svg-download")
-  .on("click", function () {
-    const serializer = new XMLSerializer();
-    const svgString = serializer.serializeToString(document.querySelector('svg'));
-    const blob = new Blob([svgString], { type: "image/svg+xml;charset=utf-8" });
-    saveAs(blob, "graph.svg");
-    
-    // Display success notification after the user has decided where to save the file
-    setTimeout(function () {
-      swal({
-        title: "Success!",
-        text: "Graph screenshot saved successfully.",
-        icon: "success",
-        timer: 2000,
-        buttons: false
-      });
-    }, 500); // Delay to allow file save dialog to open
-  });
-
-// Add event listener for JSON download
-d3.select("#json-download")
-  .on("click", function () {
-    const json = JSON.stringify({ nodes: graph.nodes, links: graph.links });
-    const blob = new Blob([json], { type: "application/json" });
-    saveAs(blob, "graph.json");
-    
-    // Display success notification after the user has decided where to save the file
-    setTimeout(function () {
-      swal({
-        title: "Success!",
-        text: "Graph JSON structure saved successfully.",
-        icon: "success",
-        timer: 2000,
-        buttons: false
-      });
-    }, 500); // Delay to allow file save dialog to open
-  });
-
-
-d3.select("#json-upload")
-.on("click", function () {
-  document.getElementById('json-file-input').click();
-});
-
-d3.select("#json-file-input")
-  .on("change", function () {
-    const file = this.files[0];
-    if (file) {
-      // Check if the file type is JSON
-      if (file.type !== "application/json") {
-        swal({
-          title: "Error!",
-          text: "Please select a JSON file.",
-          icon: "error",
-          timer: 2000,
-          buttons: false
-        });
-
-        // Reset the input element
-        document.getElementById('json-file-input').value = "";
-        return;
-      }
-
-      swal({
-        title: "Are you sure you want to load a new graph?",
-        text: "This operation will overwrite the current graph.",
-        icon: "warning",
-        buttons: ["No", "Yes"],
-        dangerMode: true,
-      }).then((willLoad) => {
-        if (willLoad) {
-          const reader = new FileReader();
-          reader.onload = function (event) {
-            try {
-              const json = JSON.parse(event.target.result);
-              upload(json);
-              
-              // Display success notification
-              swal({
-                title: "Success!",
-                text: "Your graph has been loaded",
-                icon: "success",
-                timer: 2000,
-                buttons: false
-              });
-            } catch (error) {
-              // Display error notification
-              swal({
-                title: "Error!",
-                text: "The graph could not be loaded",
-                icon: "error",
-                timer: 2000,
-                buttons: false
-              });
-            }
-            
-            // Reset the input element
-            document.getElementById('json-file-input').value = "";
-          };
-          reader.readAsText(file);
-        } else {
-          // Reset the input element if the user cancels the operation
-          document.getElementById('json-file-input').value = "";
-        }
-      });
-    }
-  });
-
-
-  function upload(json) {
-    // Extract only the necessary attributes for nodes
-    graph.nodes = json.nodes.map(node => ({
-      id: node.id,
-      label: node.label,
-      x: node.x,
-      y: node.y,
-      type: node.type
-    }));
-  
-    // Extract only the necessary attributes for links
-    graph.links = json.links.map(link => ({
-      id: link.id,
-      label: link.label,
-      source: link.source.id,
-      target: link.target.id,
-      index: link.index
-    }));
-  
-    graph.objectify();
-    update();
-  }
+  graph.objectify();
+  update();
+}
 
 // Funzione che restituisce il tipo di selezione corrente (nodo o link)
 function selectionType(selection){
@@ -740,7 +497,6 @@ function selectionType(selection){
     }
   return null;
 }
-
 
 // Funzione per aggiornare un nodo o un arco
 function submitChanges(selection) {
@@ -873,8 +629,258 @@ function toggleSimulation() {
   }
 }
 
-// Collegamento degli event listeners ai toggle
-simulationOnIcon.addEventListener('click', toggleSimulation);
-simulationOffIcon.addEventListener('click', toggleSimulation);
+d3.select(window).on('click', function () {
+  if (global.selection !== null) {
+    d3.select("#delete").classed('active', true);
+    d3.select("#delete").classed('unactive', false);
+
+    if (selectionType(global.selection) == "node") {
+      if (global.selection.type != "bend") {
+        d3.select("#edit").classed('active', true);
+        d3.select("#edit").classed('unactive', false);
+      }
+      else {
+        d3.select("#edit").classed('active', false);
+        d3.select("#edit").classed('unactive', true);
+      }
+
+      d3.select("#add-bend").classed('active', false);
+      d3.select("#add-bend").classed('unactive', true);
+    }
+    else {
+      d3.select("#edit").classed('active', true);
+      d3.select("#edit").classed('unactive', false);
+      d3.select("#add-bend").classed('active', true);
+      d3.select("#add-bend").classed('unactive', false);
+    }
+  }
+  else {
+    d3.select("#delete").classed('active', false);
+    d3.select("#delete").classed('unactive', true);
+    d3.select("#edit").classed('active', false);
+    d3.select("#edit").classed('unactive', true);
+    d3.select("#add-bend").classed('unactive', true);
+    d3.select("#add-bend").classed('active', false);
+
+    // Svuota le statistiche
+    visualizeStatistics("","","");
+  }
+});
+
+// Gestione dello strumento puntatore
+d3.select("#pointer")
+    .on("click", function () {
+      global.tool = "pointer";
+      d3.select("#pointer").classed('active', true);
+      d3.select("#add-node").classed('active', false);
+      d3.select("#add-link").classed('active', false);
+      hideLibrary();
+    });
+
+// Gestione strumenti della toolbar
+d3.select("#add-node")
+  .on("click", function () {
+    global.tool = "add-node";
+    d3.select("#pointer").classed('active', false);
+    d3.select("#add-node").classed('active', true);
+    d3.select("#add-link").classed('active', false);
+
+    showLibrary()});
+
+    // Gestione aggiunta archi
+d3.select("#add-link")
+  .on("click", function () {
+    global.tool = "add-link";
+    d3.select("#pointer").classed('active', false);
+    d3.select("#add-node").classed('active', false);
+    d3.select("#add-link").classed('active', true);
+    hideLibrary();
+  });
+
+// Gestione aggiunta piegamenti
+d3.select("#add-bend")
+.on("click", function () {
+  d3.selectAll('.link').classed('selected', false);
+  if (global.selection) {
+    if (selectionType(global.selection) == "link") {
+      const link = global.selection;
+      const sourceNode = link.source;
+      const targetNode = link.target;
+      const bendNode = graph.add_node("bend", (sourceNode.x + targetNode.x) / 2, (sourceNode.y + targetNode.y) / 2);
+      link.target = bendNode;
+      graph.add_link(bendNode, targetNode, true);
+      global.selection = null;
+      update();
+    }
+  }
+});
+
+// Gestione modifica elemento
+d3.select("#edit")
+  .on("click", function () {
+    if (global.selection) {
+      if (selectionType(global.selection) == "node") {
+        if (global.selection.type == "bend") {
+          return;
+        }
+      }
+      const success = submitChanges(global.selection);
+      if (success) {
+        update();
+      }
+    }
+  });
+
+// Gestione cancellazione elemento
+d3.select("#delete")
+  .on("click", function () {
+    if (global.selection) {
+      graph.remove(global.selection);
+      global.selection = null;
+      update();
+    }
+  });
+
+// Gestione cancellazione grafo
+d3.select("#delete-graph")
+  .on("click", function() {
+    // Mostra l'alert di conferma
+    swal({
+      title: "Are you sure to remove the graph?",
+      text: "Once deleted, you will not be able to recover this graph!",
+      icon: "warning",
+      buttons: true,
+      dangerMode: true,
+    })
+    .then((willDelete) => {
+      if (willDelete) {
+        swal("Your graph has been deleted!", {
+          icon: "success",
+          timer: 2000,
+          buttons: false
+        });
+        graph.nodes = [];
+        graph.links = [];
+        update();
+      } else {
+        swal("The graph is unchanged!", {
+          timer: 2000,
+          buttons: false
+        });
+        return
+        }
+    });
+  });
+
+// Add event listener for SVG download
+d3.select("#svg-download")
+  .on("click", function () {
+    const serializer = new XMLSerializer();
+    const svgString = serializer.serializeToString(document.querySelector('svg'));
+    const blob = new Blob([svgString], { type: "image/svg+xml;charset=utf-8" });
+    saveAs(blob, "graph.svg");
+    
+    // Display success notification after the user has decided where to save the file
+    setTimeout(function () {
+      swal({
+        title: "Success!",
+        text: "Graph screenshot saved successfully.",
+        icon: "success",
+        timer: 2000,
+        buttons: false
+      });
+    }, 500); // Delay to allow file save dialog to open
+  });
+
+// Add event listener for JSON download
+d3.select("#json-download")
+  .on("click", function () {
+    const json = JSON.stringify({ nodes: graph.nodes, links: graph.links });
+    const blob = new Blob([json], { type: "application/json" });
+    saveAs(blob, "graph.json");
+    
+    // Display success notification after the user has decided where to save the file
+    setTimeout(function () {
+      swal({
+        title: "Success!",
+        text: "Graph JSON structure saved successfully.",
+        icon: "success",
+        timer: 2000,
+        buttons: false
+      });
+    }, 500); // Delay to allow file save dialog to open
+  });
+
+
+// Gestione upload json
+d3.select("#json-upload")
+.on("click", function () {
+  document.getElementById('json-file-input').click();
+});
+
+// Gestione upload file
+d3.select("#json-file-input")
+  .on("change", function () {
+    const file = this.files[0];
+    if (file) {
+      // Check if the file type is JSON
+      if (file.type !== "application/json") {
+        swal({
+          title: "Error!",
+          text: "Please select a JSON file.",
+          icon: "error",
+          timer: 2000,
+          buttons: false
+        });
+
+        // Reset the input element
+        document.getElementById('json-file-input').value = "";
+        return;
+      }
+
+      swal({
+        title: "Are you sure you want to load a new graph?",
+        text: "This operation will overwrite the current graph.",
+        icon: "warning",
+        buttons: ["No", "Yes"],
+        dangerMode: true,
+      }).then((willLoad) => {
+        if (willLoad) {
+          const reader = new FileReader();
+          reader.onload = function (event) {
+            try {
+              const json = JSON.parse(event.target.result);
+              upload(json);
+              
+              // Display success notification
+              swal({
+                title: "Success!",
+                text: "Your graph has been loaded",
+                icon: "success",
+                timer: 2000,
+                buttons: false
+              });
+            } catch (error) {
+              // Display error notification
+              swal({
+                title: "Error!",
+                text: "The graph could not be loaded",
+                icon: "error",
+                timer: 2000,
+                buttons: false
+              });
+            }
+            
+            // Reset the input element
+            document.getElementById('json-file-input').value = "";
+          };
+          reader.readAsText(file);
+        } else {
+          // Reset the input element if the user cancels the operation
+          document.getElementById('json-file-input').value = "";
+        }
+      });
+    }
+  });
 
 main();
