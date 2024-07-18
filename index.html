@@ -88,10 +88,14 @@
 
     <div class="download-options-popup" id="download-options-popup">
         <i id="close-download-options" class="icon fa-solid fa-xmark fa-lg"></i>
-        <label for="node-link-list">Node and link list</label>
+        <label for="node-link-list">Node-link list</label>
         <input id="node-link-list" type="radio" name="download-options-radio">
-        <label for="all-graph-info">Whole graph (including positions)</label>
+        <label for="node-link-list-without-bend">Node-link list (no bends)</label>
+        <input id="node-link-list-without-bend" type="radio" name="download-options-radio">
+        <label for="all-graph-info">Whole structure</label>
         <input id="all-graph-info" type="radio" name="download-options-radio">
+        <label for="all-graph-without-bend">Whole structure (no bends)</label>
+        <input id="all-graph-without-bend" type="radio" name="download-options-radio">
     </div>
 
     <input type="file" id="json-file-input" accept=".json" style="display: none;">
