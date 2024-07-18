@@ -112,7 +112,7 @@ body {
 }
 
 /* Popup Styles */
-.info-popup, .download-options-popup{
+.info-popup{
     display: none;
     position: fixed;
     top: 0;
@@ -124,7 +124,7 @@ body {
     align-items: center;
 }
 
-.info-popup-content {
+.info-popup-content{
     background-color: #EDF2F4;
     padding: 20px;
     border-radius: 10px;
@@ -160,10 +160,39 @@ body {
     flex-grow: 1;
 }
 
-#close-info-popup {
+#close-info-popup{
     position: absolute;
     top: 20px;
     right: 10px;
+    cursor: pointer;
+}
+/*Download options popup Styles*/
+.download-options-popup {
+    display: none;
+    position: absolute;
+    top: 70px; /* Adjust this value based on your toolbar height */
+    right: 20px;
+    background-color: #EDF2F4;
+    padding: 10px;
+    border-radius: 10px;
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.2);
+    z-index: 100;
+    flex-direction: column;
+    gap: 10px;
+}
+
+.download-options-popup label {
+    margin-bottom: 5px;
+    display: flex;
+    justify-content: space-between;
+}
+
+.download-options-popup input {
+    margin-left: 10px;
+}
+
+#close-download-options {
+    align-self: flex-end;
     cursor: pointer;
 }
 
@@ -282,19 +311,4 @@ body {
 
 #slider-icon {
     display: inline;
-}
-
-
-/*Download options popup style*/
-.download-options-popup {
-    display: none; /* Nascondi inizialmente */
-    position: absolute;
-    top: 0;
-    left: 0;
-    flex-direction: column;
-    gap: 10px;
-    background-color: #EDF2F4;
-    padding: 10px;
-    border-radius: 10px;
-    box-shadow: 0 0 10px rgba(0, 0, 0, 0.2);
 }
