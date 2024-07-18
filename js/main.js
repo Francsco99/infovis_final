@@ -519,7 +519,7 @@ function submitChanges(selection) {
               <option value="red" ${selection.type === "red" ? "selected" : ""}>Red</option>
               <option value="blue" ${selection.type === "blue" ? "selected" : ""}>Blue</option>
               <option value="green" ${selection.type === "green" ? "selected" : ""}>Green</option>
-              <option value="violet" ${selection.type === "violet" ? "selected" : ""}>Violet</option>
+              <option value="purple" ${selection.type === "purple" ? "selected" : ""}>Purple</option>
               <option value="orange" ${selection.type === "orange" ? "selected" : ""}>Orange</option>
           </select>
       </div>
@@ -556,9 +556,9 @@ function submitChanges(selection) {
 // Funzione per visualizzare le statistiche in alto a sinistra
 function visualizeStatistics(id,label,color){
   document.querySelector('.toolbar-left').innerHTML = `
-            <span>ID: <span class="stats">${id}</span></span>
-            <span>LABEL: <span class="stats">${label}</span></span>
-            <span>COLOR: <span class="stats">${color}</span></span>
+            <span class="stats-label">ID: <span class="stats">${id}</span></span>
+            <span class="stats-label">LABEL: <span class="stats">${label}</span></span>
+            <span class="stats-label">COLOR: <span class="stats">${color}</span></span>
   `;
 }
 
