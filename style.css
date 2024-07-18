@@ -25,7 +25,6 @@ body {
 
 .toolbar-left span {
     margin-right: 15px;
-    font-weight: bold;
 }
 
 .toolbar-right {
@@ -112,7 +111,7 @@ body {
 }
 
 /* Popup Styles */
-.popup {
+.info-popup{
     display: none;
     position: fixed;
     top: 0;
@@ -124,39 +123,75 @@ body {
     align-items: center;
 }
 
-.popup-content {
-    background-color: white;
+.info-popup-content{
+    background-color: #EDF2F4;
     padding: 20px;
     border-radius: 10px;
     width: 50%;
     max-width: 600px;
     position: relative;
-    text-align: center;
+    text-align: left; /* Align text to the left */
 }
 
-.popup-content h2 {
+.info-popup-content h2 {
     margin-top: 0;
+    text-align: center !important;
 }
 
-.popup-content ul {
+.info-popup-content ul {
     list-style-type: none;
     padding: 0;
 }
 
-.popup-content ul li {
+.info-popup-content ul li {
     display: flex;
     align-items: center;
     margin: 15px 0;
 }
 
-.popup-content ul li i {
+.info-popup-content ul li i {
     margin-right: 10px;
+    width: 40px; /* Fixed width for icons */
+    text-align: center; /* Center align icons within their fixed width */
 }
 
-#close-popup {
+.info-popup-content ul li span {
+    flex-grow: 1;
+}
+
+#close-info-popup{
     position: absolute;
     top: 20px;
     right: 10px;
+    cursor: pointer;
+}
+/*Download options popup Styles*/
+.download-options-popup {
+    display: none;
+    position: absolute;
+    top: 70px; /* Adjust this value based on your toolbar height */
+    right: 20px;
+    background-color: #EDF2F4;
+    padding: 10px;
+    border-radius: 10px;
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.2);
+    z-index: 100;
+    flex-direction: column;
+    gap: 10px;
+}
+
+.download-options-popup label {
+    margin-bottom: 5px;
+    display: flex;
+    justify-content: space-between;
+}
+
+.download-options-popup input {
+    margin-left: 10px;
+}
+
+#close-download-options {
+    align-self: flex-end;
     cursor: pointer;
 }
 
@@ -205,24 +240,7 @@ body {
 }
 
 /* Node Info Styles */
-#node_id,
-#node_label,
-#node_color {
-    margin-inline: 5px;
-    text-align: center;
-}
 
-#node_id {
-    width: 30px;
-}
-
-#node_label {
-    width: 50px;
-}
-
-#node_color {
-    width: 80px;
-}
 
 /* Color Picker */
 #color-picker {
@@ -274,5 +292,16 @@ body {
 }
 
 #slider-icon {
-    display: none;
+    display: inline;
+}
+
+.edit-form label{
+    font-weight: bold;
+}
+
+.stats-label{
+    font-weight: bold;
+}
+.stats{
+    font-weight: normal !important;
 }
