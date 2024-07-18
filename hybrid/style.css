@@ -112,7 +112,7 @@ body {
 }
 
 /* Popup Styles */
-.popup {
+.info-popup, .download-options-popup{
     display: none;
     position: fixed;
     top: 0;
@@ -124,36 +124,43 @@ body {
     align-items: center;
 }
 
-.popup-content {
+.info-popup-content {
     background-color: #EDF2F4;
     padding: 20px;
     border-radius: 10px;
     width: 50%;
     max-width: 600px;
     position: relative;
-    text-align: center;
+    text-align: left; /* Align text to the left */
 }
 
-.popup-content h2 {
+.info-popup-content h2 {
     margin-top: 0;
+    text-align: center !important;
 }
 
-.popup-content ul {
+.info-popup-content ul {
     list-style-type: none;
     padding: 0;
 }
 
-.popup-content ul li {
+.info-popup-content ul li {
     display: flex;
     align-items: center;
     margin: 15px 0;
 }
 
-.popup-content ul li i {
+.info-popup-content ul li i {
     margin-right: 10px;
+    width: 40px; /* Fixed width for icons */
+    text-align: center; /* Center align icons within their fixed width */
 }
 
-#close-popup {
+.info-popup-content ul li span {
+    flex-grow: 1;
+}
+
+#close-info-popup {
     position: absolute;
     top: 20px;
     right: 10px;
@@ -275,4 +282,19 @@ body {
 
 #slider-icon {
     display: inline;
+}
+
+
+/*Download options popup style*/
+.download-options-popup {
+    display: none; /* Nascondi inizialmente */
+    position: absolute;
+    top: 0;
+    left: 0;
+    flex-direction: column;
+    gap: 10px;
+    background-color: #EDF2F4;
+    padding: 10px;
+    border-radius: 10px;
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.2);
 }

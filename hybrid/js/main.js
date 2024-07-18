@@ -787,12 +787,12 @@ d3.select("#svg-download")
   });
 
 // Add event listener for JSON download
-d3.select("#json-download")
+/*d3.select("#json-download")
   .on("click", function () {
     const json = JSON.stringify({ nodes: graph.nodes, links: graph.links });
     const blob = new Blob([json], { type: "application/json" });
     saveAs(blob, "graph.json");
-  });
+  });*/
 
 
 // Gestione upload json

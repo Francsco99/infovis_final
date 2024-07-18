@@ -5,11 +5,11 @@ document.addEventListener('DOMContentLoaded', () => {
     const canvas = document.getElementById('graph-canvas');
     
     const chargeSlider = document.getElementById('charge');
-    const linkSlider = document.getElementById('link');
+    //const linkSlider = document.getElementById('link');
     const attractSlider = document.getElementById('attract');
     
     const chargeValue = document.getElementById('charge-value');
-    const linkValue = document.getElementById('link-value');
+    //const linkValue = document.getElementById('link-value');
     const attractValue = document.getElementById('attract-value');
 
     const simulationOffIcon = document.getElementById("force-off");
@@ -52,6 +52,28 @@ document.addEventListener('DOMContentLoaded', () => {
         // Check if the click is outside the forceControl element
         if (!forceControl.contains(event.target) && event.target !== sliderIcon) {
             forceControl.style.display = 'none';
+        }
+    });
+
+    // Aggiungi il gestore per il popup delle opzioni di download JSON
+    const jsonDownloadIcon = document.getElementById('json-download');
+    const downloadOptionsPopup = document.getElementById('download-options-popup');
+    const closeDownloadOptions = document.getElementById('close-download-options');
+
+    jsonDownloadIcon.addEventListener('click', () => {
+        const offset = jsonDownloadIcon.getBoundingClientRect();
+        downloadOptionsPopup.style.top = `${offset.top + jsonDownloadIcon.offsetHeight + 10}px`;
+        downloadOptionsPopup.style.left = `${offset.left}px`;
+        downloadOptionsPopup.style.display = 'flex';
+    });
+
+    closeDownloadOptions.addEventListener('click', () => {
+        downloadOptionsPopup.style.display = 'none';
+    });
+
+    document.addEventListener('click', (event) => {
+        if (!downloadOptionsPopup.contains(event.target) && event.target !== jsonDownloadIcon) {
+            downloadOptionsPopup.style.display = 'none';
         }
     });
 });
