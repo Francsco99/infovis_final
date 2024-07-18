@@ -779,17 +779,6 @@ d3.select("#svg-download")
     const svgString = serializer.serializeToString(document.querySelector('svg'));
     const blob = new Blob([svgString], { type: "image/svg+xml;charset=utf-8" });
     saveAs(blob, "graph.svg");
-    
-    // Display success notification after the user has decided where to save the file
-    setTimeout(function () {
-      swal({
-        title: "Success!",
-        text: "Graph screenshot saved successfully.",
-        icon: "success",
-        timer: 2000,
-        buttons: false
-      });
-    }, 500); // Delay to allow file save dialog to open
   });
 
 // Add event listener for JSON download
@@ -798,17 +787,6 @@ d3.select("#json-download")
     const json = JSON.stringify({ nodes: graph.nodes, links: graph.links });
     const blob = new Blob([json], { type: "application/json" });
     saveAs(blob, "graph.json");
-    
-    // Display success notification after the user has decided where to save the file
-    setTimeout(function () {
-      swal({
-        title: "Success!",
-        text: "Graph JSON structure saved successfully.",
-        icon: "success",
-        timer: 2000,
-        buttons: false
-      });
-    }, 500); // Delay to allow file save dialog to open
   });
 
 
