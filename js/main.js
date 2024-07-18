@@ -21,8 +21,14 @@ const allGraph = document.getElementById("all-graph-info");
 
 
 // Colori dei nodi 
+const colorsMap = new Map([["Yellow", "#e6c229"],["Orange", "#f17105"],["Magenta", "#d11149"],["Violet", "#6610f2"],["Blue","#1a8fe3"],["Green","#329638"]]);
 
-const colorsMap = new Map([["#e6c229","Yellow"],["#f17105","Orange"],["#d11149","Pink"],["#6610f2","Violet"],["#1a8fe3","Blue"],["#329638","Green"]]);
+var hexToColorName = new Map();
+
+for (const colorName of colorsMap.keys()) {
+  hexToColorName.set(colorsMap.get(colorName), colorName);
+};
+
 // Gestisce la selezione e il tool corrente
 var global = {
   selection: null,
@@ -373,7 +379,7 @@ function update() {
       d3.selectAll('.node').classed('selected', false);
 
       // visualizzazione statistiche
-      visualizeStatistics(d.id,d.label,"");
+      visualizeStatistics(d.id, d.label, "");
     });
 
   links.exit().remove();
@@ -445,9 +451,9 @@ function update() {
 function showLibrary() {
   // Costruzione del contenuto HTML per il color picker
   let colorPickerHtml = '<div id="color-picker">';
-  colorsMap.forEach((color,hex) => {
-    colorPickerHtml += `<div class="color-option" data-color="${hex}" style="background-color: ${hex};"></div>`;
-  });
+  for (const colorName of colorsMap.keys()) {
+    colorPickerHtml += `<div class="color-option" data-color="${colorsMap.get(colorName)}" style="background-color: ${colorsMap.get(colorName)};"></div>`;
+  };
   colorPickerHtml += '</div>';
 
   // Inserimento del color picker nell'elemento con id "toolbar-extra"
@@ -536,7 +542,7 @@ function selectionType(selection){
 function submitChanges(selection) {
   const mode = selectionType(selection);
   if (mode === "node") {
-    $(".toolbar-left").html(`
+    var toolbarLeftHtml = `
       <div class="edit-form">
           <label for="node_id">ID:</label>
           <span class="stats" id="node_id">${selection.id}</span>
@@ -544,15 +550,17 @@ function submitChanges(selection) {
           <input class="stats" type="text" id="node_label" size="4" value="${selection.label}" />
           <label for="node_color">COLOR:</label>
           
-          <select class="stats" id="node_color">
-              <option value="#2ab7ca" ${selection.type === "#2ab7ca" ? "selected" : ""}>Blue</option>
-              <option value="#cf2637" ${selection.type === "#cf2637" ? "selected" : ""}>Red</option>
-              <option value="#4d936c" ${selection.type === "#4d936c" ? "selected" : ""}>Green</option>
-              <option value="#f07d19" ${selection.type === "#f07d19" ? "selected" : ""}>Orange</option>
-              <option value="#985d98" ${selection.type === "#985d98" ? "selected" : ""}>Violet</option>
-          </select>
+          <select class="stats" id="node_color">`
+
+    for (const colorName of colorsMap.keys()) {
+      toolbarLeftHtml += `<option value="${colorsMap.get(colorName)}" ${selection.type === colorsMap.get(colorName) ? "selected" : ""}>${colorName}</option>
+      `;
+    };
+
+    toolbarLeftHtml += `</select>
       </div>
-    `);
+    `
+    $(".toolbar-left").html(toolbarLeftHtml);
     
     $("#node_label").on("input", () => {
       selection.label = document.getElementById("node_label").value;
@@ -583,11 +591,12 @@ function submitChanges(selection) {
 }
 
 // Funzione per visualizzare le statistiche in alto a sinistra
-function visualizeStatistics(id,label,color){
+function visualizeStatistics(id, label, color){
+  if (hexToColorName.has(color)) color = hexToColorName.get(color);
   document.querySelector('.toolbar-left').innerHTML = `
             <span class="stats-label">ID: <span class="stats">${id}</span></span>
             <span class="stats-label">LABEL: <span class="stats">${label}</span></span>
-            <span class="stats-label">COLOR: <span class="stats">${color}</span></span>
+            <span class="stats-label">CLASS: <span class="stats">${color}</span></span>
   `;
 }
 
@@ -610,8 +619,8 @@ function populateGraph(numNodes, numLinks){
 
   // Creazione dei nodi
   for (let i = 1; i <= numNodes; i++) {
-    graph.add_node(Array.from(colorsMap.keys())[Math.floor(Math.random() * 5)] ); // Assegna un colore casuale
-}
+    graph.add_node(Array.from(colorsMap.values())[Math.floor(Math.random() * 5)] ); // Assegna un colore casuale
+  }
   
   // Creazione degli archi
   let edgeCount = 0;
@@ -1071,5 +1080,6 @@ d3.select("#json-file-input")
       });
     }
   });
-visualizeStatistics("","","");
+
+visualizeStatistics("", "", "");
 main();
