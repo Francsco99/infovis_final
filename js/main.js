@@ -470,26 +470,53 @@ function hideLibrary() {
 
 // Funzione per caricare il file json del grafo
 function upload(json) {
-  // Extract only the necessary attributes for nodes
-  graph.nodes = json.nodes.map(node => ({
-    id: node.id,
-    label: node.label,
-    x: node.x,
-    y: node.y,
-    type: node.type
-  }));
+  // Check if all nodes have both x and y attributes
+  const allNodesHaveCoordinates = json.nodes.every(node => node.hasOwnProperty('x') && node.hasOwnProperty('y'));
+  graph.nodes = [];
+  graph.links = [];
+  update();
 
-  // Extract only the necessary attributes for links
-  graph.links = json.links.map(link => ({
-    id: link.id,
-    label: link.label,
-    source: link.source.id,
-    target: link.target.id,
-    index: link.index
-  }));
+  if (!allNodesHaveCoordinates) {
+    // If any node is missing x or y, activate simulation after a 4-second delay
+    // Extract only the necessary attributes for nodes
+    graph.nodes = json.nodes.map(node => ({
+      id: node.id,
+      label: node.label,
+      x: width / 2,
+      y: height / 2,
+      type: node.type
+    }));
 
+    // Extract only the necessary attributes for links
+    graph.links = json.links.map(link => ({
+      id: link.id,
+      label: link.label,
+      source: link.source.id,
+      target: link.target.id,
+      index: link.index
+    }));
+  } else {
+    // If all nodes have both x and y
+    graph.nodes = json.nodes.map(node => ({
+      id: node.id,
+      label: node.label,
+      x: node.x,
+      y: node.y,
+      type: node.type
+    }));
+
+    // Extract only the necessary attributes for links
+    graph.links = json.links.map(link => ({
+      id: link.id,
+      label: link.label,
+      source: link.source.id,
+      target: link.target.id,
+      index: link.index
+    }));
+  }
   graph.objectify();
   update();
+  global.simulationActive = false;
 }
 
 // Funzione che restituisce il tipo di selezione corrente (nodo o link)
@@ -572,7 +599,7 @@ function updateForces() {
     
     global.simulation
         .force("charge", d3.forceManyBody().strength(chargeValue))
-        .force("link", d3.forceLink(graph.links).strength(0))
+        .force("link", d3.forceLink(graph.links).strength(0.1))
         .force("attract", d3.forceRadial(0, width / 2, height / 2).strength(attractStrength))
         .alpha(1)
         .restart();
@@ -636,6 +663,51 @@ function toggleSimulation() {
       simulationOnIcon.style.display = 'none';
       simulationOffIcon.style.display = 'block';
   }
+}
+
+// Function to download node and link list with specific attributes
+function downloadNodeLinkList() {
+  // Filter nodes to include only specified attributes
+  const filteredNodes = graph.nodes.map(node => ({
+    id: node.id,
+    label: node.label,
+    type: node.type,
+    index: node.index
+  }));
+
+  // Filter links to include only specified attributes for source and target
+  const filteredLinks = graph.links.map(link => ({
+    id: link.id,
+    label: link.label,
+    source: {
+      id: link.source.id,
+      label: link.source.label,
+      type: link.source.type,
+      index: link.source.index
+    },
+    target: {
+      id: link.target.id,
+      label: link.target.label,
+      type: link.target.type,
+      index: link.target.index
+    },
+    index: link.index
+  }));
+
+  // Create the new JSON object with filtered nodes and links
+  const filteredGraph = { nodes: filteredNodes, links: filteredLinks };
+
+  // Convert the filtered graph to JSON
+  const json = JSON.stringify(filteredGraph, null, 2); // The second argument is for pretty printing (optional)
+  const blob = new Blob([json], { type: "application/json" });
+  saveAs(blob, "node_link_list.json");
+}
+
+// Function to download whole graph information including positions
+function downloadAllGraphInfo() {
+  const json = JSON.stringify({ nodes: graph.nodes, links: graph.links });
+  const blob = new Blob([json], { type: "application/json" });
+  saveAs(blob, "whole_graph_info.json");
 }
 
 d3.select(window).on('click', function () {
@@ -790,18 +862,46 @@ d3.select("#svg-download")
     saveAs(blob, "graph.svg");
   });
 
-// Add event listener for JSON download
-/*d3.select("#json-download")
-  .on("click", function () {
-    const json = JSON.stringify({ nodes: graph.nodes, links: graph.links });
-    const blob = new Blob([json], { type: "application/json" });
-    saveAs(blob, "graph.json");
-  });*/
+// Add event listener for JSON download button
+d3.select("#json-download").on("click", function () {
+  // Show the download options popup
+  d3.select("#download-options-popup").style("display", "block");
+});
 
+// Add event listener for closing the download options popup
+d3.select("#close-download-options").on("click", function () {
+  d3.select("#download-options-popup").style("display", "none");
+});
+
+// Add event listener for node and link list download option
+d3.select("#node-link-list").on("click", function () {
+  d3.select("#download-options-popup").style("display", "none");
+  downloadNodeLinkList();
+  // Deselect the radio button after the download starts
+  d3.select("#node-link-list").property("checked", false);
+});
+
+// Add event listener for whole graph information download option
+d3.select("#all-graph-info").on("click", function () {
+  d3.select("#download-options-popup").style("display", "none");
+  downloadAllGraphInfo();
+  // Deselect the radio button after the download starts
+  d3.select("#all-graph-info").property("checked", false);
+});
 
 // Gestione upload json
 d3.select("#json-upload")
 .on("click", function () {
+  // stop force
+  global.simulationActive = false; 
+  global.simulation
+    .force("charge", d3.forceManyBody().strength(0))
+    .force("link", d3.forceLink(graph.links).strength(0))
+    .force("attract", d3.forceRadial(0, width / 2, height / 2).strength(0)); // Forza che tende a tenere i nodi al centro
+    
+  simulationOnIcon.style.display = 'none';
+  simulationOffIcon.style.display = 'block';
+  
   document.getElementById('json-file-input').click();
 });
 
@@ -809,6 +909,8 @@ d3.select("#json-upload")
 d3.select("#json-file-input")
   .on("change", function () {
     const file = this.files[0];
+    nodes = graph.nodes;
+    links = graph.links;
     if (file) {
       // Check if the file type is JSON
       if (file.type !== "application/json") {
@@ -848,6 +950,9 @@ d3.select("#json-file-input")
                 buttons: false
               });
             } catch (error) {
+              graph.nodes = nodes;
+              graph.links = links;
+              update();
               // Display error notification
               swal({
                 title: "Error!",
