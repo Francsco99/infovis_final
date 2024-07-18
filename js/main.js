@@ -20,9 +20,9 @@ const nodeLinkList = document.getElementById("node-link-list");
 const allGraph = document.getElementById("all-graph-info");
 
 
-// Colori dei nodi
-const colors = ['red', 'blue', 'green', 'purple', 'orange'];
+// Colori dei nodi 
 
+const colorsMap = new Map([["#e6c229","Yellow"],["#f17105","Orange"],["#d11149","Pink"],["#6610f2","Violet"],["#1a8fe3","Blue"],["#329638","Green"]]);
 // Gestisce la selezione e il tool corrente
 var global = {
   selection: null,
@@ -445,8 +445,8 @@ function update() {
 function showLibrary() {
   // Costruzione del contenuto HTML per il color picker
   let colorPickerHtml = '<div id="color-picker">';
-  colors.forEach(color => {
-    colorPickerHtml += `<div class="color-option" data-color="${color}" style="background-color: ${color};"></div>`;
+  colorsMap.forEach((color,hex) => {
+    colorPickerHtml += `<div class="color-option" data-color="${hex}" style="background-color: ${hex};"></div>`;
   });
   colorPickerHtml += '</div>';
 
@@ -504,6 +504,7 @@ function selectionType(selection){
   return null;
 }
 
+
 // Funzione per aggiornare un nodo o un arco
 function submitChanges(selection) {
   const mode = selectionType(selection);
@@ -515,12 +516,13 @@ function submitChanges(selection) {
           <label for="node_label">LABEL:</label>
           <input class="stats" type="text" id="node_label" size="4" value="${selection.label}" />
           <label for="node_color">COLOR:</label>
+          
           <select class="stats" id="node_color">
-              <option value="red" ${selection.type === "red" ? "selected" : ""}>Red</option>
-              <option value="blue" ${selection.type === "blue" ? "selected" : ""}>Blue</option>
-              <option value="green" ${selection.type === "green" ? "selected" : ""}>Green</option>
-              <option value="purple" ${selection.type === "purple" ? "selected" : ""}>Purple</option>
-              <option value="orange" ${selection.type === "orange" ? "selected" : ""}>Orange</option>
+              <option value="#2ab7ca" ${selection.type === "#2ab7ca" ? "selected" : ""}>Blue</option>
+              <option value="#cf2637" ${selection.type === "#cf2637" ? "selected" : ""}>Red</option>
+              <option value="#4d936c" ${selection.type === "#4d936c" ? "selected" : ""}>Green</option>
+              <option value="#f07d19" ${selection.type === "#f07d19" ? "selected" : ""}>Orange</option>
+              <option value="#985d98" ${selection.type === "#985d98" ? "selected" : ""}>Violet</option>
           </select>
       </div>
     `);
@@ -578,9 +580,10 @@ function updateForces() {
 
 // Funzione per costruire un grafo random
 function populateGraph(numNodes, numLinks){
+
   // Creazione dei nodi
   for (let i = 1; i <= numNodes; i++) {
-    graph.add_node(colors[Math.floor(Math.random() * 5)] ); // Assegna un colore casuale
+    graph.add_node(Array.from(colorsMap.keys())[Math.floor(Math.random() * 5)] ); // Assegna un colore casuale
 }
   
   // Creazione degli archi
