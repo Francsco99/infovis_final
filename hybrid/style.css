@@ -125,7 +125,7 @@ body {
 }
 
 .popup-content {
-    background-color: white;
+    background-color: #EDF2F4;
     padding: 20px;
     border-radius: 10px;
     width: 50%;
@@ -274,5 +274,5 @@ body {
 }
 
 #slider-icon {
-    display: none;
+    display: inline;
 }
