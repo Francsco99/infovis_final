@@ -20,9 +20,9 @@ const nodeLinkList = document.getElementById("node-link-list");
 const allGraph = document.getElementById("all-graph-info");
 
 
-// Colori dei nodi 
+// Colori dei nodi
+const colors = ['red', 'blue', 'green', 'purple', 'orange'];
 
-const colorsMap = new Map([["#e6c229","Yellow"],["#f17105","Orange"],["#d11149","Pink"],["#6610f2","Violet"],["#1a8fe3","Blue"],["#329638","Green"]]);
 // Gestisce la selezione e il tool corrente
 var global = {
   selection: null,
@@ -207,7 +207,6 @@ var graph = {
 
 // Funzione principale
 function main() {
-  
 /*
   graph.nodes = [
     { id: '1', label:"A", type: 'blue' },
@@ -445,8 +444,8 @@ function update() {
 function showLibrary() {
   // Costruzione del contenuto HTML per il color picker
   let colorPickerHtml = '<div id="color-picker">';
-  colorsMap.forEach((color,hex) => {
-    colorPickerHtml += `<div class="color-option" data-color="${hex}" style="background-color: ${hex};"></div>`;
+  colors.forEach(color => {
+    colorPickerHtml += `<div class="color-option" data-color="${color}" style="background-color: ${color};"></div>`;
   });
   colorPickerHtml += '</div>';
 
@@ -468,57 +467,6 @@ function hideLibrary() {
   $("#toolbar-extra").html(``);
 }
 
-// Funzione per caricare il file json del grafo
-function upload(json) {
-  // Check if all nodes have both x and y attributes
-  const allNodesHaveCoordinates = json.nodes.every(node => node.hasOwnProperty('x') && node.hasOwnProperty('y'));
-  graph.nodes = [];
-  graph.links = [];
-  update();
-
-  if (!allNodesHaveCoordinates) {
-    // If any node is missing x or y, activate simulation after a 4-second delay
-    // Extract only the necessary attributes for nodes
-    graph.nodes = json.nodes.map(node => ({
-      id: node.id,
-      label: node.label,
-      x: width / 2,
-      y: height / 2,
-      type: node.type
-    }));
-
-    // Extract only the necessary attributes for links
-    graph.links = json.links.map(link => ({
-      id: link.id,
-      label: link.label,
-      source: link.source.id,
-      target: link.target.id,
-      index: link.index
-    }));
-  } else {
-    // If all nodes have both x and y
-    graph.nodes = json.nodes.map(node => ({
-      id: node.id,
-      label: node.label,
-      x: node.x,
-      y: node.y,
-      type: node.type
-    }));
-
-    // Extract only the necessary attributes for links
-    graph.links = json.links.map(link => ({
-      id: link.id,
-      label: link.label,
-      source: link.source.id,
-      target: link.target.id,
-      index: link.index
-    }));
-  }
-  graph.objectify();
-  update();
-  global.simulationActive = false;
-}
-
 // Funzione che restituisce il tipo di selezione corrente (nodo o link)
 function selectionType(selection){
   if (selection !== null) {
@@ -531,7 +479,6 @@ function selectionType(selection){
   return null;
 }
 
-
 // Funzione per aggiornare un nodo o un arco
 function submitChanges(selection) {
   const mode = selectionType(selection);
@@ -539,17 +486,16 @@ function submitChanges(selection) {
     $(".toolbar-left").html(`
       <div class="edit-form">
           <label for="node_id">ID:</label>
-          <span class="stats" id="node_id">${selection.id}</span>
+          <span id="node_id">${selection.id}</span>
           <label for="node_label">LABEL:</label>
-          <input class="stats" type="text" id="node_label" size="4" value="${selection.label}" />
+          <input type="text" id="node_label" size="4" value="${selection.label}" />
           <label for="node_color">COLOR:</label>
-          
-          <select class="stats" id="node_color">
-              <option value="#2ab7ca" ${selection.type === "#2ab7ca" ? "selected" : ""}>Blue</option>
-              <option value="#cf2637" ${selection.type === "#cf2637" ? "selected" : ""}>Red</option>
-              <option value="#4d936c" ${selection.type === "#4d936c" ? "selected" : ""}>Green</option>
-              <option value="#f07d19" ${selection.type === "#f07d19" ? "selected" : ""}>Orange</option>
-              <option value="#985d98" ${selection.type === "#985d98" ? "selected" : ""}>Violet</option>
+          <select id="node_color">
+              <option value="red" ${selection.type === "red" ? "selected" : ""}>Red</option>
+              <option value="blue" ${selection.type === "blue" ? "selected" : ""}>Blue</option>
+              <option value="green" ${selection.type === "green" ? "selected" : ""}>Green</option>
+              <option value="violet" ${selection.type === "violet" ? "selected" : ""}>Violet</option>
+              <option value="orange" ${selection.type === "orange" ? "selected" : ""}>Orange</option>
           </select>
       </div>
     `);
@@ -585,9 +531,9 @@ function submitChanges(selection) {
 // Funzione per visualizzare le statistiche in alto a sinistra
 function visualizeStatistics(id,label,color){
   document.querySelector('.toolbar-left').innerHTML = `
-            <span class="stats-label">ID: <span class="stats">${id}</span></span>
-            <span class="stats-label">LABEL: <span class="stats">${label}</span></span>
-            <span class="stats-label">COLOR: <span class="stats">${color}</span></span>
+            <span>ID: ${id}</span>
+            <span>LABEL: ${label}</span>
+            <span>COLOR: ${color}</span>
   `;
 }
 
@@ -599,7 +545,7 @@ function updateForces() {
     
     global.simulation
         .force("charge", d3.forceManyBody().strength(chargeValue))
-        .force("link", d3.forceLink(graph.links).strength(0.1))
+        .force("link", d3.forceLink(graph.links).strength(0))
         .force("attract", d3.forceRadial(0, width / 2, height / 2).strength(attractStrength))
         .alpha(1)
         .restart();
@@ -607,10 +553,9 @@ function updateForces() {
 
 // Funzione per costruire un grafo random
 function populateGraph(numNodes, numLinks){
-
   // Creazione dei nodi
   for (let i = 1; i <= numNodes; i++) {
-    graph.add_node(Array.from(colorsMap.keys())[Math.floor(Math.random() * 5)] ); // Assegna un colore casuale
+    graph.add_node(colors[Math.floor(Math.random() * 5)] ); // Assegna un colore casuale
 }
   
   // Creazione degli archi
@@ -647,11 +592,11 @@ function toggleSimulation() {
     
     global.simulation
       .force("charge", d3.forceManyBody().strength(-300))
-      .force("link", d3.forceLink(graph.links).strength(0.1))
+      .force("link", d3.forceLink(graph.links).strength(0))
       .force("attract", d3.forceRadial(0, width / 2, height / 2).strength(0.1)); // Forza che tende a tenere i nodi al centro
     
       simulationOnIcon.style.display = 'block';
-      simulationOffIcon.style.display = 'none';
+    simulationOffIcon.style.display = 'none';
   } else if(global.simulationActive){
     global.simulationActive = false;
     
@@ -661,142 +606,8 @@ function toggleSimulation() {
       .force("attract", d3.forceRadial(0, width / 2, height / 2).strength(0)); // Forza che tende a tenere i nodi al centro
     
       simulationOnIcon.style.display = 'none';
-      simulationOffIcon.style.display = 'block';
+    simulationOffIcon.style.display = 'block';
   }
-}
-
-// Function to download node and link list with specific attributes
-function downloadNodeLinkList() {
-  // Filter nodes to include only specified attributes
-  const filteredNodes = graph.nodes.map(node => ({
-    id: node.id,
-    label: node.label,
-    type: node.type,
-    index: node.index
-  }));
-
-  // Filter links to include only specified attributes for source and target
-  const filteredLinks = graph.links.map(link => ({
-    id: link.id,
-    label: link.label,
-    source: {
-      id: link.source.id,
-      label: link.source.label,
-      type: link.source.type,
-      index: link.source.index
-    },
-    target: {
-      id: link.target.id,
-      label: link.target.label,
-      type: link.target.type,
-      index: link.target.index
-    },
-    index: link.index
-  }));
-
-  // Create the new JSON object with filtered nodes and links
-  const filteredGraph = { nodes: filteredNodes, links: filteredLinks };
-
-  // Convert the filtered graph to JSON
-  const json = JSON.stringify(filteredGraph, null, 2); // The second argument is for pretty printing (optional)
-  const blob = new Blob([json], { type: "application/json" });
-  saveAs(blob, "node_link_list.json");
-}
-
-function downloadNodeLinkListWithoutBend(){
-// Filter nodes to include only specified attributes and remove nodes with type "bend"
-const filteredNodes = graph.nodes.map(node => {
-  if (node.type === "bend") {
-    graph.remove(node);
-  }
-  return {
-    id: node.id,
-    label: node.label,
-    x: width/2,
-    y: height/2,
-    type: node.type,
-    index: node.index
-  };
-}).filter(node => node.type !== "bend"); // Exclude nodes with type "bend" from the final list
-
-// Filter links to include only specified attributes for source and target
-const filteredLinks = graph.links.map(link => ({
-  id: link.id,
-  label: link.label,
-  source: {
-    id: link.source.id,
-    label: link.source.label,
-    type: link.source.type,
-    index: link.source.index
-  },
-  target: {
-    id: link.target.id,
-    label: link.target.label,
-    type: link.target.type,
-    index: link.target.index
-  },
-  index: link.index
-}));
-
-// Create the new JSON object with filtered nodes and links
-const filteredGraph = { nodes: filteredNodes, links: filteredLinks };
-
-// Convert the filtered graph to JSON
-const json = JSON.stringify(filteredGraph, null, 2); // The second argument is for pretty printing (optional)
-const blob = new Blob([json], { type: "application/json" });
-saveAs(blob, "node_link_list_no_bends.json");
-}
-
-// Function to download node and link list with specific attributes
-function downloadAllGraphWithoutBend() {
-  // Filter nodes to include only specified attributes and remove nodes with type "bend"
-  const filteredNodes = graph.nodes.map(node => {
-    if (node.type === "bend") {
-      graph.remove(node);
-    }
-    return {
-      id: node.id,
-      label: node.label,
-      x: node.x,
-      y: node.y,
-      type: node.type,
-      index: node.index
-    };
-  }).filter(node => node.type !== "bend"); // Exclude nodes with type "bend" from the final list
-
-  // Filter links to include only specified attributes for source and target
-  const filteredLinks = graph.links.map(link => ({
-    id: link.id,
-    label: link.label,
-    source: {
-      id: link.source.id,
-      label: link.source.label,
-      type: link.source.type,
-      index: link.source.index
-    },
-    target: {
-      id: link.target.id,
-      label: link.target.label,
-      type: link.target.type,
-      index: link.target.index
-    },
-    index: link.index
-  }));
-
-  // Create the new JSON object with filtered nodes and links
-  const filteredGraph = { nodes: filteredNodes, links: filteredLinks };
-
-  // Convert the filtered graph to JSON
-  const json = JSON.stringify(filteredGraph, null, 2); // The second argument is for pretty printing (optional)
-  const blob = new Blob([json], { type: "application/json" });
-  saveAs(blob, "all_graph_no_bend.json");
-}
-
-// Function to download whole graph information including positions
-function downloadAllGraphInfo() {
-  const json = JSON.stringify({ nodes: graph.nodes, links: graph.links });
-  const blob = new Blob([json], { type: "application/json" });
-  saveAs(blob, "all_graph.json");
 }
 
 d3.select(window).on('click', function () {
@@ -951,10 +762,56 @@ d3.select("#svg-download")
     saveAs(blob, "graph.svg");
   });
 
-// Add event listener for closing the download options popup
-d3.select("#close-download-options").on("click", function () {
-  d3.select("#download-options-popup").style("display", "none");
-});
+// Funzione per caricare il file json del grafo
+function upload(json) {
+  // Check if all nodes have both x and y attributes
+  const allNodesHaveCoordinates = json.nodes.every(node => node.hasOwnProperty('x') && node.hasOwnProperty('y'));
+  graph.nodes = [];
+  graph.links = [];
+  update();
+
+  if (!allNodesHaveCoordinates) {
+    // If any node is missing x or y, activate simulation after a 4-second delay
+    // Extract only the necessary attributes for nodes
+    graph.nodes = json.nodes.map(node => ({
+      id: node.id,
+      label: node.label,
+      x: width / 2,
+      y: height / 2,
+      type: node.type
+    }));
+
+    // Extract only the necessary attributes for links
+    graph.links = json.links.map(link => ({
+      id: link.id,
+      label: link.label,
+      source: link.source.id,
+      target: link.target.id,
+      index: link.index
+    }));
+  } else {
+    // If all nodes have both x and y
+    graph.nodes = json.nodes.map(node => ({
+      id: node.id,
+      label: node.label,
+      x: node.x,
+      y: node.y,
+      type: node.type
+    }));
+
+    // Extract only the necessary attributes for links
+    graph.links = json.links.map(link => ({
+      id: link.id,
+      label: link.label,
+      source: link.source.id,
+      target: link.target.id,
+      index: link.index
+    }));
+  }
+  graph.objectify();
+  update();
+  global.simulationActive = false;
+}
 
 // Add event listener for JSON download button
 d3.select("#json-download").on("click", function () {
@@ -962,29 +819,128 @@ d3.select("#json-download").on("click", function () {
   d3.select("#download-options-popup").style("display", "block");
 });
 
+// Add event listener for closing the download options popup
+d3.select("#close-download-options").on("click", function () {
+  d3.select("#download-options-popup").style("display", "none");
+});
+
 // Add event listener for node and link list download option
 d3.select("#node-link-list").on("click", function () {
   d3.select("#download-options-popup").style("display", "none");
   downloadNodeLinkList();
-});
-
-// Add event listener for node and link list without bends download option
-d3.select('#node-link-list-without-bend').on("click", function(){
-  d3.select("#download-options-popup").style("display", "none");
-  downloadNodeLinkListWithoutBend();
-});
-
-// Add event listener for whole graph information download option
-d3.select("#all-graph-without-bend").on("click", function () {
-  d3.select("#download-options-popup").style("display", "none");
-  downloadAllGraphWithoutBend();
+  // Deselect the radio button after the download starts
+  d3.select("#node-link-list").property("checked", false);
 });
 
 // Add event listener for whole graph information download option
 d3.select("#all-graph-info").on("click", function () {
   d3.select("#download-options-popup").style("display", "none");
   downloadAllGraphInfo();
+  // Deselect the radio button after the download starts
+  d3.select("#all-graph-info").property("checked", false);
 });
+
+// Add event listener for whole graph information download option
+d3.select("#all-graph-without-bend").on("click", function () {
+  d3.select("#download-options-popup").style("display", "none");
+  downloadAllGraphWithoutBend();
+  // Deselect the radio button after the download starts
+  d3.select("#all-graph-without-bend").property("checked", false);
+});
+
+// Function to download node and link list with specific attributes
+function downloadNodeLinkList() {
+  // Filter nodes to include only specified attributes
+  const filteredNodes = graph.nodes.map(node => ({
+    id: node.id,
+    label: node.label,
+    type: node.type,
+    index: node.index
+  }));
+
+  // Filter links to include only specified attributes for source and target
+  const filteredLinks = graph.links.map(link => ({
+    id: link.id,
+    label: link.label,
+    source: {
+      id: link.source.id,
+      label: link.source.label,
+      type: link.source.type,
+      index: link.source.index
+    },
+    target: {
+      id: link.target.id,
+      label: link.target.label,
+      type: link.target.type,
+      index: link.target.index
+    },
+    index: link.index
+  }));
+
+  // Create the new JSON object with filtered nodes and links
+  const filteredGraph = { nodes: filteredNodes, links: filteredLinks };
+
+  // Convert the filtered graph to JSON
+  const json = JSON.stringify(filteredGraph, null, 2); // The second argument is for pretty printing (optional)
+  const blob = new Blob([json], { type: "application/json" });
+  saveAs(blob, "whole_graph_without_bend.json.json");
+}
+
+// Function to download node and link list with specific attributes
+function downloadAllGraphWithoutBend() {
+  // Filter nodes to include only specified attributes and remove nodes with type "bend"
+  const filteredNodes = graph.nodes.map(node => {
+    if (node.type === "bend") {
+      graph.remove(node);
+    }
+    return {
+      id: node.id,
+      label: node.label,
+      x: node.x,
+      y: node.y,
+      type: node.type,
+      index: node.index
+    };
+  }).filter(node => node.type !== "bend"); // Exclude nodes with type "bend" from the final list
+
+  // Filter links to include only specified attributes for source and target
+  const filteredLinks = graph.links.map(link => ({
+    id: link.id,
+    label: link.label,
+    source: {
+      id: link.source.id,
+      label: link.source.label,
+      type: link.source.type,
+      index: link.source.index
+    },
+    target: {
+      id: link.target.id,
+      label: link.target.label,
+      type: link.target.type,
+      index: link.target.index
+    },
+    index: link.index
+  }));
+
+  // Create the new JSON object with filtered nodes and links
+  const filteredGraph = { nodes: filteredNodes, links: filteredLinks };
+
+  // Convert the filtered graph to JSON
+  const json = JSON.stringify(filteredGraph, null, 2); // The second argument is for pretty printing (optional)
+  const blob = new Blob([json], { type: "application/json" });
+  saveAs(blob, "node_link_list.json");
+}
+
+// Function to download whole graph information including positions
+function downloadAllGraphInfo() {
+  const json = JSON.stringify({ nodes: graph.nodes, links: graph.links });
+  const blob = new Blob([json], { type: "application/json" });
+  saveAs(blob, "whole_graph_info.json");
+}
+
+
+
+
 
 // Gestione upload json
 d3.select("#json-upload")
@@ -1037,6 +993,7 @@ d3.select("#json-file-input")
             try {
               const json = JSON.parse(event.target.result);
               upload(json);
+
               
               // Display success notification
               swal({
@@ -1058,6 +1015,7 @@ d3.select("#json-file-input")
                 timer: 2000,
                 buttons: false
               });
+
             }
             
             // Reset the input element
@@ -1071,5 +1029,5 @@ d3.select("#json-file-input")
       });
     }
   });
-visualizeStatistics("","","");
+
 main();
