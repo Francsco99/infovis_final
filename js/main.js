@@ -276,7 +276,7 @@ svg.on('wheel', (event) => {
   //.force("link", d3.forceLink(graph.links).distance(+linkSlider.value).id(d => d.id))
   global.simulation = d3.forceSimulation(graph.nodes)
     .force("charge", d3.forceManyBody().strength(-300))
-    //.force("link", d3.forceLink(graph.links).strength(0.1))
+    .force("link", d3.forceLink(graph.links).strength(0.1))
     .force("attract", d3.forceRadial(0, width / 2, height / 2).strength(0.1)) // Forza che tende a tenere i nodi al centro
     .on("tick", () => {
       // Aggiornamento posizione nodi e archi
@@ -617,7 +617,7 @@ function toggleSimulation() {
     
     global.simulation
       .force("charge", d3.forceManyBody().strength(-300))
-      //.force("link", d3.forceLink(graph.links).strength(0))
+      .force("link", d3.forceLink(graph.links).strength(0.1))
       .force("attract", d3.forceRadial(0, width / 2, height / 2).strength(0.1)); // Forza che tende a tenere i nodi al centro
     
       simulationOnIcon.style.display = 'block';
@@ -627,7 +627,7 @@ function toggleSimulation() {
     
     global.simulation
       .force("charge", d3.forceManyBody().strength(0))
-      //.force("link", d3.forceLink(graph.links).strength(0))
+      .force("link", d3.forceLink(graph.links).strength(0))
       .force("attract", d3.forceRadial(0, width / 2, height / 2).strength(0)); // Forza che tende a tenere i nodi al centro
     
       simulationOnIcon.style.display = 'none';
