@@ -799,6 +799,44 @@ function downloadAllGraphInfo() {
   saveAs(blob, "all_graph.json");
 }
 
+d3.select(window).on('click', function () {
+  if (global.selection !== null) {
+    d3.select("#delete").classed('active', true);
+    d3.select("#delete").classed('unactive', false);
+
+    if (selectionType(global.selection) == "node") {
+      if (global.selection.type != "bend") {
+        d3.select("#edit").classed('active', true);
+        d3.select("#edit").classed('unactive', false);
+      }
+      else {
+        d3.select("#edit").classed('active', false);
+        d3.select("#edit").classed('unactive', true);
+      }
+
+      d3.select("#add-bend").classed('active', false);
+      d3.select("#add-bend").classed('unactive', true);
+    }
+    else {
+      d3.select("#edit").classed('active', true);
+      d3.select("#edit").classed('unactive', false);
+      d3.select("#add-bend").classed('active', true);
+      d3.select("#add-bend").classed('unactive', false);
+    }
+  }
+  else {
+    d3.select("#delete").classed('active', false);
+    d3.select("#delete").classed('unactive', true);
+    d3.select("#edit").classed('active', false);
+    d3.select("#edit").classed('unactive', true);
+    d3.select("#add-bend").classed('unactive', true);
+    d3.select("#add-bend").classed('active', false);
+
+    // Svuota le statistiche
+    visualizeStatistics("","","");
+  }
+});
+
 // Gestione dello strumento puntatore
 d3.select("#pointer")
     .on("click", function () {
@@ -913,46 +951,39 @@ d3.select("#svg-download")
     saveAs(blob, "graph.svg");
   });
 
+// Add event listener for closing the download options popup
+d3.select("#close-download-options").on("click", function () {
+  d3.select("#download-options-popup").style("display", "none");
+});
+
 // Add event listener for JSON download button
 d3.select("#json-download").on("click", function () {
   // Show the download options popup
   d3.select("#download-options-popup").style("display", "block");
 });
 
-// Add event listener for closing the download options popup
-d3.select("#close-download-options").on("click", function () {
-  d3.select("#download-options-popup").style("display", "none");
-});
-
 // Add event listener for node and link list download option
 d3.select("#node-link-list").on("click", function () {
   d3.select("#download-options-popup").style("display", "none");
   downloadNodeLinkList();
-  // Deselect the radio button after the download starts
-  d3.select("#node-link-list").property("checked", false);
 });
 
+// Add event listener for node and link list without bends download option
 d3.select('#node-link-list-without-bend').on("click", function(){
   d3.select("#download-options-popup").style("display", "none");
   downloadNodeLinkListWithoutBend();
-  // Deselect the radio button after the download starts
-  d3.select("#node-link-list-without-bend").property("checked", false);
 });
 
 // Add event listener for whole graph information download option
 d3.select("#all-graph-without-bend").on("click", function () {
   d3.select("#download-options-popup").style("display", "none");
   downloadAllGraphWithoutBend();
-  // Deselect the radio button after the download starts
-  d3.select("#all-graph-without-bend").property("checked", false);
 });
 
 // Add event listener for whole graph information download option
 d3.select("#all-graph-info").on("click", function () {
   d3.select("#download-options-popup").style("display", "none");
   downloadAllGraphInfo();
-  // Deselect the radio button after the download starts
-  d3.select("#all-graph-info").property("checked", false);
 });
 
 // Gestione upload json

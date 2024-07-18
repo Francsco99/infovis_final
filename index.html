@@ -84,20 +84,16 @@
         <input id="charge" type="range" min="-600" max="-100" step="10" value="-300">
         <label for="attract">Center gravity: <span id="attract-value">0.1</span></label>
         <input id="attract" type="range" min="0" max="0.5" step="0.05" value="0.1">
-    </div>  
+    </div> 
 
     <div class="download-options-popup" id="download-options-popup">
         <i id="close-download-options" class="icon fa-solid fa-xmark fa-lg"></i>
-        <label for="node-link-list">Node-link list</label>
-        <input id="node-link-list" type="radio" name="download-options-radio">
-        <label for="node-link-list-without-bend">Node-link list (no bends)</label>
-        <input id="node-link-list-without-bend" type="radio" name="download-options-radio">
-        <label for="all-graph-info">Whole structure</label>
-        <input id="all-graph-info" type="radio" name="download-options-radio">
-        <label for="all-graph-without-bend">Whole structure (no bends)</label>
-        <input id="all-graph-without-bend" type="radio" name="download-options-radio">
-    </div>
-
+        <button id="node-link-list">Node-link list</button>
+        <button id="node-link-list-without-bend">Node-link list (no bends)</button>
+        <button id="all-graph-info">Whole structure</button>
+        <button id="all-graph-without-bend">Whole structure (no bends)</button>
+    </div>    
+    
     <input type="file" id="json-file-input" accept=".json" style="display: none;">
 
     <script src="js/main.js"></script>
