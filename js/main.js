@@ -207,6 +207,7 @@ var graph = {
 
 // Funzione principale
 function main() {
+  
 /*
   graph.nodes = [
     { id: '1', label:"A", type: 'blue' },
@@ -275,7 +276,7 @@ svg.on('wheel', (event) => {
   //.force("link", d3.forceLink(graph.links).distance(+linkSlider.value).id(d => d.id))
   global.simulation = d3.forceSimulation(graph.nodes)
     .force("charge", d3.forceManyBody().strength(-300))
-    .force("link", d3.forceLink(graph.links).strength(0.1))
+    //.force("link", d3.forceLink(graph.links).strength(0.1))
     .force("attract", d3.forceRadial(0, width / 2, height / 2).strength(0.1)) // Forza che tende a tenere i nodi al centro
     .on("tick", () => {
       // Aggiornamento posizione nodi e archi
@@ -510,11 +511,11 @@ function submitChanges(selection) {
     $(".toolbar-left").html(`
       <div class="edit-form">
           <label for="node_id">ID:</label>
-          <span id="node_id">${selection.id}</span>
+          <span class="stats" id="node_id">${selection.id}</span>
           <label for="node_label">LABEL:</label>
-          <input type="text" id="node_label" size="4" value="${selection.label}" />
+          <input class="stats" type="text" id="node_label" size="4" value="${selection.label}" />
           <label for="node_color">COLOR:</label>
-          <select id="node_color">
+          <select class="stats" id="node_color">
               <option value="red" ${selection.type === "red" ? "selected" : ""}>Red</option>
               <option value="blue" ${selection.type === "blue" ? "selected" : ""}>Blue</option>
               <option value="green" ${selection.type === "green" ? "selected" : ""}>Green</option>
@@ -555,9 +556,9 @@ function submitChanges(selection) {
 // Funzione per visualizzare le statistiche in alto a sinistra
 function visualizeStatistics(id,label,color){
   document.querySelector('.toolbar-left').innerHTML = `
-            <span>ID: ${id}</span>
-            <span>LABEL: ${label}</span>
-            <span>COLOR: ${color}</span>
+            <span>ID: <span class="stats">${id}</span></span>
+            <span>LABEL: <span class="stats">${label}</span></span>
+            <span>COLOR: <span class="stats">${color}</span></span>
   `;
 }
 
@@ -616,21 +617,21 @@ function toggleSimulation() {
     
     global.simulation
       .force("charge", d3.forceManyBody().strength(-300))
-      .force("link", d3.forceLink(graph.links).strength(0))
+      //.force("link", d3.forceLink(graph.links).strength(0))
       .force("attract", d3.forceRadial(0, width / 2, height / 2).strength(0.1)); // Forza che tende a tenere i nodi al centro
     
       simulationOnIcon.style.display = 'block';
-    simulationOffIcon.style.display = 'none';
+      simulationOffIcon.style.display = 'none';
   } else if(global.simulationActive){
     global.simulationActive = false;
     
     global.simulation
       .force("charge", d3.forceManyBody().strength(0))
-      .force("link", d3.forceLink(graph.links).strength(0))
+      //.force("link", d3.forceLink(graph.links).strength(0))
       .force("attract", d3.forceRadial(0, width / 2, height / 2).strength(0)); // Forza che tende a tenere i nodi al centro
     
       simulationOnIcon.style.display = 'none';
-    simulationOffIcon.style.display = 'block';
+      simulationOffIcon.style.display = 'block';
   }
 }
 
@@ -865,5 +866,5 @@ d3.select("#json-file-input")
       });
     }
   });
-
+visualizeStatistics("","","");
 main();

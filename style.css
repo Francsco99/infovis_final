@@ -241,24 +241,7 @@ body {
 }
 
 /* Node Info Styles */
-#node_id,
-#node_label,
-#node_color {
-    margin-inline: 5px;
-    text-align: center;
-}
 
-#node_id {
-    width: 30px;
-}
-
-#node_label {
-    width: 50px;
-}
-
-#node_color {
-    width: 80px;
-}
 
 /* Color Picker */
 #color-picker {
@@ -311,4 +294,12 @@ body {
 
 #slider-icon {
     display: inline;
+}
+
+.edit-form label{
+    font-weight: bold;
+}
+
+.stats{
+    font-weight: normal !important;
 }
