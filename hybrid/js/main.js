@@ -15,6 +15,11 @@ const simulationOnIcon = document.getElementById("force-on");
 simulationOnIcon.addEventListener('click', toggleSimulation);
 simulationOffIcon.addEventListener('click', toggleSimulation);
 
+//Input checkbox per i parametri del download json
+const nodeLinkList = document.getElementById("node-link-list");
+const allGraph = document.getElementById("all-graph-info");
+
+
 // Colori dei nodi
 const colors = ['red', 'blue', 'green', 'purple', 'orange'];
 
