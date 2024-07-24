@@ -2,4 +2,4 @@
 
 Progetto relativo al corso di Visualizzazione delle Informazioni
 
-demo: http://www.fspezzano.it/infovis_final/
+Demo: https://www.fspezzano.it/infovis_final/
